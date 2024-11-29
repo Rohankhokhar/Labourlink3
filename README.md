@@ -24,6 +24,12 @@ Python 3.12.2
 - create requirements.txt
 (<your-env-name>).../LabourLink > type nul > requirements.txt
 
+- add installed modules and packages in requirements.txt file
+(<your-env-name>).../LabourLink > pip freeze > requirements.txt
+
+- install modules and packegs from requirements.txt file
+(<your-env-name>).../LabourLink > pip install -r requirements.txt
+
 - Now install django
 (<your-env-name>).../LabourLink > pip install django
 
@@ -88,6 +94,39 @@ from django.apps import AppConfig
 class DashboardConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = '<app-dir-name>.<app-name>'
+
+
+- Django admin account:[ create super user]
+(<your-env-name>).../LabourLink >  python manage.py createsuperuser
+Username (leave blank to use 'brijesh'): admin
+Email address: admn
+Error: Enter a valid email address.
+Email address:
+Password: ********
+Password (again): ********
+The password is too similar to the username.
+This password is too short. It must contain at least 8 characters.
+This password is too common.
+Bypass password validation and create user anyway? [y/N]: y
+Superuser created successfully.
+
+- migrate and make-migrations
+(<your-env-name>).../LabourLink >  python manage.py migrate
+(<your-env-name>).../LabourLink >  python manage.py makemigrations
+
+
+- create static dir
+LLApps(apps-dir) / 
+    / dashboard(app)
+        / static - mkdir
+            / dashbaord(app-name) - mkdir
+
+- create templates dir
+LLApps(apps-dir) / 
+    / dashboard(app)
+        / templates - mkdir
+            / dashbaord(app-name) - mkdir
+
 
 - run your project 
 (<your-env-name>).../LabourLink >  python manage.py runserver <port-number>
