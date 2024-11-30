@@ -136,3 +136,13 @@ November 28, 2024 - 10:15:09
 Django version 5.1.3, using settings 'project.settings'
 Starting development server at http://127.0.0.1:8000/
 Quit the server with CTRL-BREAK.
+
+
+
+URL : https://witzcode.pythonanywhere.com/technology/1/15/?wz_tech=python&wz_category=variable
+
+http: hyper text transfer protocol
+s: secure socket layer
+witzcode.pythonanywhere.com : domain -> ip-address:port 
+/technology/1/15: endpoints
+?wz_tech=python&wz_category=variable: query paramenters
