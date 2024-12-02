@@ -146,3 +146,48 @@ s: secure socket layer
 witzcode.pythonanywhere.com : domain -> ip-address:port 
 /technology/1/15: endpoints
 ?wz_tech=python&wz_category=variable: query paramenters
+
+
+
+- CREATE MODEL
+from django.db import models
+
+class AbstrctModelName(models.Model)
+  field_name = models.field_type(config...)
+
+class ChildModelName(AbstractModelName):
+  field_name = models.field_type(config...)
+
+
+if any change or add in model fields
+([your-env-name]).../LabourLink > python manage.py makemigrations
+after make-migrations, you have to apply the migrations via "python manage.py migrate"
+([your-env-name]).../LabourLink > python manage.py migrate
+
+Now check created table in database : exist or not
+
+
+
+Project Flow:
+
+Labour -
+  AUTH :
+    - can registration
+      * first_name
+      * last_name
+      * email
+      * mobile
+      * password
+      * confirm_password
+
+    - can login
+      * email
+      * password
+
+    - can forgot password
+      * registered-email 
+        - send otp
+          - auto render on otp verification page
+            * otp
+            * new-password
+            * confirm-password
