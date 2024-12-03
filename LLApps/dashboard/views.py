@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password
+from LLApps.dashboard.forms import contactRequestForm
 
 
 from LLApps.labour.models import Labour
@@ -53,6 +54,16 @@ def tasks_view(request):
 
 def payments_view(request):
     return render(request, 'dashboard/payments.html')
+
+def contact_view(request):
+    if request.method == 'POST':
+        form = contactRequestForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return render(request, 'dashboard/contact.html', {'form': form,'success_message': 'Your message has been sent successfully'})
+    form = contactRequestForm()
+    print(form)
+    return render(request, 'dashboard/contact.html', {'form': form})
 
 def profile_view(request):
     return render(request, 'dashboard/profiles.html')

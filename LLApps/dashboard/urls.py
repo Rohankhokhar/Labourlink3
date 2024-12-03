@@ -9,5 +9,6 @@ urlpatterns = [
     path('parties/', parties_view, name='parties_view'),
     path('tasks/', tasks_view, name='tasks_view'),
     path('payments/', payments_view, name='payments_view'),
+    path('contact/', contact_view, name='contact_view'),
     path('profile/', profile_view, name='profile_view'),
 ]
