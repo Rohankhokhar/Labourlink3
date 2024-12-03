@@ -167,6 +167,38 @@ after make-migrations, you have to apply the migrations via "python manage.py mi
 Now check created table in database : exist or not
 
 
+# send sms (start) --------------------------------------------------------------
+
+pip install twillio
+
+# Download the helper library from https://www.twilio.com/docs/python/install
+import os
+from twilio.rest import Client
+
+
+# Find your Account SID and Auth Token at twilio.com/console
+# and set the environment variables. See http://twil.io/secure
+account_sid = os.environ['TWILIO_ACCOUNT_SID']
+auth_token = os.environ['TWILIO_AUTH_TOKEN']
+client = Client(account_sid, auth_token)
+
+message = client.messages.create(
+                              from_='+15017122661',
+                              body='Hi there',
+                              to='+15558675310')
+print(message.sid)
+
+# send sms (end) --------------------------------------------------------------
+
+# form config (start) ---------------------------------------------------------
+
+step-1: <form action="#" method=""  enctype="multipart/form-data"> [*enctype when wants to submit file data]
+step-2: {% csrf_token %}
+step-3: make sure you have set name attribute with all fields
+<input type="first_name" name="first_name">
+step-4: button -> type must be "submit"
+
+# form config (end) ---------------------------------------------------------
 
 Project Flow:
 

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.hashers import make_password
+
 
 from LLApps.master.models import BaseModel
 # Create your models here.
@@ -11,14 +11,13 @@ class Labour(BaseModel):
     mobile= models.CharField(max_length=20)
     password = models.CharField(max_length=255)
     is_active = models.BooleanField(default=False)
+    terms_and_condition = models.BooleanField(default=False)
     otp = models.CharField(default='000000', max_length=6)
 
     def __str__(self):
         return self.first_name + " " + self.last_name + "-" + str(self.llid)
     
     def save(self, *args, **kwargs):
-        if not self.llid:
-            self.password = make_password(self.password)
         self.email = self.email.lower()
         super(Labour, self).save(*args, **kwargs)
 
