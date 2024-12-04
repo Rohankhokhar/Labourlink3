@@ -12,4 +12,5 @@ urlpatterns = [
     path('payments/', payments_view, name='payments_view'),
     path('contact/', contact_view, name='contact_view'),
     path('profile/', profile_view, name='profile_view'),
+    path('some-error-page/', some_error_page, name='some_error_page'),
 ]
