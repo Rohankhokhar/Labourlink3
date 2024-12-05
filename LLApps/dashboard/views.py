@@ -1,17 +1,50 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib import messages
 
 from LLApps.dashboard.forms import contactRequestForm
 from LLApps.labour.models import Labour
-from LLApps.master.helpers import validators, emails, tokens
+from LLApps.master.helpers import validators, emails, tokens, sms, unique
+
+from functools import wraps
 
 import time
 import jwt
 # Create your views here.
 
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if 'LL_labour_id' not in request.session:
+            messages.error(request, 'You need to be logged in to access this page.')
+            return redirect('login_view')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
 def login_view(request):
+    if request.method == 'POST':
+        email_ = request.POST.get('email')
+        password_ = request.POST.get('password')
+
+        if not Labour.objects.filter(email=email_).exists():
+            messages.error(request, 'Invalid email or password')
+            return redirect('login_view')
+        else:
+            labour_ = Labour.objects.get(email=email_)
+            if not check_password(password_, labour_.password):
+                messages.error(request, 'Invalid email or password')
+                return redirect('login_view')
+            else:
+                request.session['LL_labour_id'] = str(labour_.llid)
+                messages.success(request, "Now, you are logged in.")
+                return redirect('dashboard_view')
     return render(request, 'dashboard/login.html')
+
+def logout(request):
+    if 'LL_labour_id' in request.session:
+        del request.session['LL_labour_id']
+    messages.success(request, 'You have been logged out.')
+    return redirect('login_view')
 
 def register_view(request):
     if request.method == 'POST':
@@ -111,20 +144,64 @@ def some_error_page(request):
     return render(request, 'web/some_error_page.html')
 
 def forgot_password_view(request):
+    if request.method == 'POST':
+        email_ = request.POST.get('email')
+        otp_ = unique.generate_otp()
+        data = {
+            'message': f'Your OTP for password reset is: {otp_}. Please use this code to reset your password.',
+            'to_email': email_
+        }
+        emails.send_password_reset_email(data)
+        get_labour = Labour.objects.get(email=email_)
+        get_labour.otp = otp_
+        get_labour.save()
+        messages.success(request, 'OTP sent successfully. Please check your email for the OTP.')
+        return render(request, 'dashboard/otp-verification.html', {'email': email_})
     return render(request, 'dashboard/forgot-password.html')
 
+
+
+def verify_otp_view(request):
+    if request.method == 'POST':
+        email_ = request.POST.get('email')
+        otp_ = request.POST.get('otp')
+        new_password_ = request.POST.get('new_password')
+        confirm_password_ = request.POST.get('confirm_password')
+        get_labour = Labour.objects.get(email=email_)
+        if get_labour.otp == otp_:
+            is_valid_password = validators.is_valid_password(new_password_)
+            print(is_valid_password)
+            if not is_valid_password[0]:
+                messages.error(request, is_valid_password[1])
+                return render(request, 'dashboard/otp-verification.html', {'email': email_})
+            else:
+                if new_password_!= confirm_password_:
+                    messages.error(request, 'Password and confirm password do not match')
+                    return render(request, 'dashboard/otp-verification.html', {'email': email_})
+                else:
+                    get_labour.password = make_password(new_password_)
+                    get_labour.save()
+                    messages.success(request, 'Password reset successfully.')
+                    return redirect('login_view')
+                
+    print("Bhar")
+    return render(request, 'dashboard/otp-verification.html')
+
+
+
+@login_required
 def dashboard_view(request):
     return render(request, 'dashboard/dashboard.html')
-
+@login_required
 def parties_view(request):
     return render(request, 'dashboard/parties.html')
-
+@login_required
 def tasks_view(request):
     return render(request, 'dashboard/tasks.html')
-
+@login_required
 def payments_view(request):
     return render(request, 'dashboard/payments.html')
-
+@login_required
 def contact_view(request):
     if request.method == 'POST':
         form = contactRequestForm(request.POST)
@@ -134,6 +211,6 @@ def contact_view(request):
     form = contactRequestForm()
     print(form)
     return render(request, 'dashboard/contact.html', {'form': form})
-
+@login_required
 def profile_view(request):
     return render(request, 'dashboard/profiles.html')

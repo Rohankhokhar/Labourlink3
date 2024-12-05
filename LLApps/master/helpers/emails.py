@@ -21,3 +21,16 @@ def send_activation_email(request, labour):
         [labour['email']],              # To email
         html_message=html_message,  # HTML message
     )
+
+def send_password_reset_email(data):
+    subject = "Password Reset Request for Your Account"
+    message = data['message']
+    from_email = settings.EMAIL_HOST_USER
+    recipient_list = [data['to_email']]
+
+    send_mail(
+        subject,
+        message,
+        from_email,
+        recipient_list,
+    )

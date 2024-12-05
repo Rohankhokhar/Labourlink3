@@ -169,7 +169,11 @@ Now check created table in database : exist or not
 
 # send sms (start) --------------------------------------------------------------
 
-pip install twillio
+recovery code : NYR5UVYVRNK75JHTN7728QGH
+Account SID : AC47e973ba9460fcf93c324289e1e5aabe
+Auth Token : 72bc3f4cd2a275370175e07b9b735007
+
+pip install twilio
 
 # Download the helper library from https://www.twilio.com/docs/python/install
 import os
@@ -189,6 +193,53 @@ message = client.messages.create(
 print(message.sid)
 
 # send sms (end) --------------------------------------------------------------
+
+
+# def forgot_password_view(request):
+#     if request.method == 'POST':
+#         mobile_ = request.POST.get('mobile')
+#         otp_ = unique.generate_otp()
+#         data = {
+#             'message': f'Your OTP for password reset is: {otp_}. Please use this code to reset your password.',
+#             'to_mobile_number':mobile_
+#         }
+#         sms.send_sms(data)
+#         get_labour = Labour.objects.get(mobile=mobile_)
+#         get_labour.otp = otp_
+#         get_labour.save()
+#         messages.success(request, 'OTP sent successfully. Please check your mobile for the OTP.')
+#         return render(request, 'dashboard/otp-verification.html', {'mobile': mobile_})
+#     return render(request, 'dashboard/forgot-password.html')
+
+
+
+# def verify_otp_view(request):
+#     if request.method == 'POST':
+#         mobile_ = request.POST.get('mobile')
+#         otp_ = request.POST.get('otp')
+#         new_password_ = request.POST.get('new_password')
+#         confirm_password_ = request.POST.get('confirm_password')
+#         get_labour = Labour.objects.filter(mobile=mobile_).first()
+#         print(get_labour)
+#         print(get_labour.otp)
+#         if get_labour.otp == otp_:
+#             is_valid_password = validators.is_valid_password(new_password_)
+#             if not is_valid_password[0]:
+#                 messages.error(request, is_valid_password[1])
+#                 return render(request, 'dashboard/otp-verification.html', {'mobile': mobile_})
+#             else:
+#                 if new_password_!= confirm_password_:
+#                     messages.error(request, 'New password and confirm password do not match')
+#                     return render(request, 'dashboard/otp-verification.html', {'mobile': mobile_})
+#                 else:
+#                     get_labour.password = make_password(new_password_)
+#                     get_labour.save()
+#                     messages.success(request, 'Password reset successfully.')
+#                     return redirect('login_view')
+#         else:
+#             messages.error(request, 'Invalid OTP. Please try again.')
+#             return render(request, 'dashboard/otp-verification.html', {'mobile': mobile_})
+#     return render(request, 'dashboard/otp-verification.html')
 
 # form config (start) ---------------------------------------------------------
 
