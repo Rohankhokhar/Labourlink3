@@ -1,13 +1,106 @@
-{% extends 'dashboard/base.html' %}
-{% load static %}
+{% extends 'dashboard/base.html' %} {% load static %} {% block title %} Profiles
+{% endblock %} {% block style %} {% endblock %} {% block body %}
+<!-- component -->
+<div
+  class="h-screen bg-gray-200 dark:bg-gray-800 flex flex-wrap items-center justify-center"
+>
+  <div
+    class="container lg:w-2/6 xl:w-2/7 sm:w-full md:w-2/3 bg-white transform duration-200 easy-in-out"
+  >
+    <div class="h-32 overflow-hidden">
+      <img
+        class="w-full"
+        src="https://img.freepik.com/premium-photo/abstract-blur-pastel-color-texture-background_66899-2539.jpg?semt=ais_hybrid"
+        alt=""
+      />
+    </div>
+    <div class="flex justify-center px-5 -mt-5">
+      <img
+        class="h-32 w-32 bg-white p-2 rounded-full"
+        src="{{get_labour_personal_info.profile.url}}"
+        alt=""
+      />
+    </div>
+    <div class=" ">
+      <div class="text-center px-14">
+        <h2 class="text-gray-800 text-3xl font-bold">
+          {{get_labour.first_name|title}} {{get_labour.last_name|title}}
+        </h2>
+        <a
+          class="text-gray-400 mt-2 hover:text-blue-500"
+          href="https://www.instagram.com/immohitdhiman/"
+          target="BLANK()"
+          >@{{get_labour.llid}}</a
+        >
 
-{% block title %}
-    Profiles
-{% endblock %}
+        <div class="max-w-6xl mx-auto p-4 bg-white shadow-md rounded-lg">
+          <h1 class="text-2xl font-bold text-center mb-6 text-gray-800"></h1>
 
-{% block style %}
-{% endblock %}
+          <div class="overflow-x-auto">
+            <table
+              class="w-full border-collapse border border-gray-200 text-left text-sm"
+            >
+              <tbody>
+                <tr>
+                  <td
+                    colspan="2"
+                    class="border border-gray-300 px-4 py-2 text-xl font-bold text-center mb-6 text-gray-800"
+                  >
+                    Personal Information
+                  </td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-300 px-4 py-2 font-medium">
+                    Email
+                  </td>
+                  <td class="border border-gray-300 px-4 py-2">
+                    {{get_labour.email}}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-300 px-4 py-2 font-medium">
+                    Mobile
+                  </td>
+                  <td class="border border-gray-300 px-4 py-2">
+                    {{get_labour.mobile}}
+                  </td>
+                </tr>
+                <!-- <tr>
+                  <td class="border border-gray-300 px-4 py-2 font-medium">
+                    Address
+                  </td>
+                  <td class="border border-gray-300 px-4 py-2">
+                    123 Main St, Springfield
+                  </td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-300 px-4 py-2 font-medium">
+                    Date of Birth
+                  </td>
+                  <td class="border border-gray-300 px-4 py-2">
+                    January 1, 1990
+                  </td>
+                </tr> -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="flex justify-center bg-gray-50 py-3">
+          <a
+            href="{% url 'update_profile_view' %}"
+            class="text-white bg-indigo-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-indigo-600 dark:hover:bg-indigo-500 focus:outline-none dark:focus:ring-indigo-600"
+          >
+            Edit profile
+          </a>
 
-
-{% block body %}
+          <a
+            href="{% url 'logout' %}"
+            class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800 mx-1"
+            >logout</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

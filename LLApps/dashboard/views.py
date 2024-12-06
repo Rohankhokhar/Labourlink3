@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.contrib import messages
 
 from LLApps.dashboard.forms import contactRequestForm
-from LLApps.labour.models import Labour
+from LLApps.labour.models import Labour, LabourPersonalInformation
 from LLApps.master.helpers import validators, emails, tokens, sms, unique
 
 from functools import wraps
@@ -11,6 +11,13 @@ from functools import wraps
 import time
 import jwt
 # Create your views here.
+
+def get_labour_from_session(request):
+    llid = Labour.objects.get(llid=request.session['LL_labour_id'])
+    personal_info = LabourPersonalInformation.objects.get(labour_id=request.session['LL_labour_id'])
+    if llid:
+        return llid, personal_info
+    return None
 
 def login_required(view_func):
     @wraps(view_func)
@@ -36,6 +43,7 @@ def login_view(request):
                 return redirect('login_view')
             else:
                 request.session['LL_labour_id'] = str(labour_.llid)
+                request.session['LL_name'] = labour_.first_name + " " + labour_.last_name
                 messages.success(request, "Now, you are logged in.")
                 return redirect('dashboard_view')
     return render(request, 'dashboard/login.html')
@@ -43,6 +51,7 @@ def login_view(request):
 def logout(request):
     if 'LL_labour_id' in request.session:
         del request.session['LL_labour_id']
+        del request.session['LL_name']
     messages.success(request, 'You have been logged out.')
     return redirect('login_view')
 
@@ -96,6 +105,11 @@ def register_view(request):
             terms_and_condition=terms_and_condition_
         )
         new_labour.save()
+
+        labour_profile = LabourPersonalInformation.objects.create(
+            labour_id = new_labour.llid
+        )
+        labour_profile.save()
         labour = {
                 'labour_id':new_labour.llid,
                 'name': new_labour.first_name + " " + new_labour.last_name,
@@ -159,8 +173,6 @@ def forgot_password_view(request):
         return render(request, 'dashboard/otp-verification.html', {'email': email_})
     return render(request, 'dashboard/forgot-password.html')
 
-
-
 def verify_otp_view(request):
     if request.method == 'POST':
         email_ = request.POST.get('email')
@@ -169,20 +181,23 @@ def verify_otp_view(request):
         confirm_password_ = request.POST.get('confirm_password')
         get_labour = Labour.objects.get(email=email_)
         if get_labour.otp == otp_:
-            is_valid_password = validators.is_valid_password(new_password_)
-            print(is_valid_password)
-            if not is_valid_password[0]:
-                messages.error(request, is_valid_password[1])
+            print(email_, otp_,get_labour.otp , new_password_, confirm_password_)
+            if new_password_ != confirm_password_:
+                messages.error(request, 'New password and confirm password do not match')
                 return render(request, 'dashboard/otp-verification.html', {'email': email_})
             else:
-                if new_password_!= confirm_password_:
-                    messages.error(request, 'Password and confirm password do not match')
+                is_valid_password = validators.is_valid_password(new_password_)
+                if not is_valid_password[0]:
+                    messages.error(request, is_valid_password[1])
                     return render(request, 'dashboard/otp-verification.html', {'email': email_})
                 else:
                     get_labour.password = make_password(new_password_)
                     get_labour.save()
-                    messages.success(request, 'Password reset successfully.')
+                    messages.success(request, 'Password reset successfully')
                     return redirect('login_view')
+        else:
+            messages.error(request, 'Invalid OTP')
+            return render(request, 'dashboard/otp-verification.html', {'email': email_})
                 
     print("Bhar")
     return render(request, 'dashboard/otp-verification.html')
@@ -213,4 +228,17 @@ def contact_view(request):
     return render(request, 'dashboard/contact.html', {'form': form})
 @login_required
 def profile_view(request):
-    return render(request, 'dashboard/profiles.html')
+    context = {
+        'get_labour': get_labour_from_session(request)[0],
+        'get_labour_personal_info': get_labour_from_session(request)[1]
+    }
+    print(context)
+    return render(request, 'dashboard/profiles.html', context)
+
+@login_required
+def update_profile_view(request):
+    context = {
+        'get_labour': get_labour_from_session(request)[0],
+        'get_labour_personal_info': get_labour_from_session(request)[1]
+    }
+    return render(request, 'dashboard/update-profile.html', context)

@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import date
 
 from LLApps.master.models import BaseModel
 # Create your models here.
@@ -28,8 +28,8 @@ class LabourPersonalInformation(BaseModel):
         ('O', 'Other'),
     )
     labour = models.ForeignKey(Labour, on_delete=models.CASCADE)
-    profile = models.ImageField(upload_to='Labour_profiles/')
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
-    date_of_birth = models.DateField()
+    profile = models.ImageField(upload_to='Labour_profiles/', default='default-images/labour-default-profile.png')
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='O')
+    date_of_birth = models.DateField(default=date(2000, 1, 1))
 
 
