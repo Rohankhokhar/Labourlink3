@@ -38,12 +38,14 @@ def login_view(request):
             return redirect('login_view')
         else:
             labour_ = Labour.objects.get(email=email_)
+            labourPersonalInfo = LabourPersonalInformation.objects.get(labour_id=labour_.llid)
             if not check_password(password_, labour_.password):
                 messages.error(request, 'Invalid email or password')
                 return redirect('login_view')
             else:
                 request.session['LL_labour_id'] = str(labour_.llid)
                 request.session['LL_name'] = labour_.first_name + " " + labour_.last_name
+                request.session['LL_profile'] = str(labourPersonalInfo.profile.url)
                 messages.success(request, "Now, you are logged in.")
                 return redirect('dashboard_view')
     return render(request, 'dashboard/login.html')
@@ -237,6 +239,43 @@ def profile_view(request):
 
 @login_required
 def update_profile_view(request):
+    get_labour, get_labour_personal_info = get_labour_from_session(request)
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        mobile = request.POST.get('mobile', '').strip()
+        gender = request.POST.get('gender', '').strip()
+        dob = request.POST.get('dob', '').strip()
+        profile_image = request.FILES.get('profile_image', None)  # Handle file input
+
+        try:
+            # Update Labour details
+            get_labour.first_name = first_name
+            get_labour.last_name = last_name
+            get_labour.email = email
+            get_labour.mobile = mobile
+            get_labour.save()
+            
+            # Update Personal Info details
+            get_labour_personal_info.gender = gender
+            get_labour_personal_info.date_of_birth = dob
+            
+            if profile_image:
+                get_labour_personal_info.profile = profile_image  # Update profile image if uploaded
+                
+            
+            get_labour_personal_info.save()
+            request.session['LL_name'] = get_labour.first_name + " " + get_labour.last_name
+            request.session['LL_profile'] = str(get_labour_personal_info.profile.url)
+
+            # Success message
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('update_profile_view')
+        
+        except Exception as e:
+            messages.error(request, f"An error occurred while updating the profile: {str(e)}")
+            return redirect('update_profile_view')
     context = {
         'get_labour': get_labour_from_session(request)[0],
         'get_labour_personal_info': get_labour_from_session(request)[1]

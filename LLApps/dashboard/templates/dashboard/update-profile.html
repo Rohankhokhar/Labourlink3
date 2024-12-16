@@ -1,5 +1,171 @@
-{% extends 'dashboard/base.html' %} {% load static %} {% block title %}
-Dashboard {% endblock %} {% block style %} {% endblock %} {% block body %}
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+{% block style %}{% endblock %}
+{% block body %}
 
+<div class="flex flex-wrap my-3 justify-center">
+  <div class="container lg:w-2/6 xl:w-2/7 sm:w-full md:w-2/3 bg-white transform duration-200 easy-in-out">
+    <div class="max-w-6xl mx-auto p-4 bg-white shadow-md rounded-lg">
+
+      <form action="{% url 'update_profile_view' %}" method="POST" enctype="multipart/form-data" class="overflow-x-auto">
+        {% csrf_token %}
+        <table class="w-full border-collapse border border-gray-200 text-left text-sm">
+          <tbody>
+
+            <!-- Section Title -->
+            <tr>
+              <td colspan="2" class="border border-gray-300 px-4 py-2 text-xl font-bold text-center text-gray-800">
+                Edit Labour Details
+              </td>
+            </tr>
+
+            <!-- Profile Image Upload -->
+            <tr>
+              <td class="border border-gray-300 px-4 py-2 font-medium">Profile</td>
+              <td class="border border-gray-300 px-4 py-2">
+                <!-- Display Current Profile Image -->
+                <div class="mb-4">
+                  <img 
+                    id="profile-preview" 
+                    src="{{ get_labour_personal_info.profile.url }}" 
+                    alt="Current Profile" 
+                    class="w-20 h-20 rounded-full object-cover border border-gray-300 shadow-sm"
+                  >
+                </div>
+
+                <!-- Drag and Drop Area -->
+                <div 
+                  id="dropzone" 
+                  class="flex items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
+                >
+                  <p class="text-gray-500">Drag & Drop your profile image here, or 
+                    <label for="profile_image" class="text-blue-500 underline cursor-pointer">browse</label>
+                  </p>
+                </div>
+
+                <!-- Hidden File Input -->
+                <input 
+                  id="profile_image" 
+                  type="file" 
+                  name="profile_image" 
+                  accept="image/*" 
+                  class="hidden"
+                >
+              </td>
+            </tr>
+
+            <!-- Firstname -->
+            <tr>
+              <td class="border border-gray-300 px-4 py-2 font-medium">Firstname</td>
+              <td class="border border-gray-300 px-4 py-2">
+                <input type="text" name="first_name" value="{{ get_labour.first_name|title }}" class="w-full p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+              </td>
+            </tr>
+
+            <!-- Lastname -->
+            <tr>
+              <td class="border border-gray-300 px-4 py-2 font-medium">Lastname</td>
+              <td class="border border-gray-300 px-4 py-2">
+                <input type="text" name="last_name" value="{{ get_labour.last_name|title }}" class="w-full p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+              </td>
+            </tr>
+
+            <!-- Email -->
+            <tr>
+              <td class="border border-gray-300 px-4 py-2 font-medium">Email</td>
+              <td class="border border-gray-300 px-4 py-2">
+                <input type="email" name="email" value="{{ get_labour.email }}" class="w-full p-3 rounded-lg shadow-sm focus:outline-none bg-gray-200 focus:ring-2 focus:ring-blue-500 text-gray-800">
+              </td>
+            </tr>
+
+            <!-- Mobile -->
+            <tr>
+              <td class="border border-gray-300 px-4 py-2 font-medium">Mobile</td>
+              <td class="border border-gray-300 px-4 py-2">
+                <input type="text" name="mobile" value="{{ get_labour.mobile }}" class="w-full p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+              </td>
+            </tr>
+
+            <!-- Gender -->
+            <tr>
+              <td class="border border-gray-300 px-4 py-2 font-medium">Gender</td>
+              <td class="border border-gray-300 px-4 py-2">
+                <select name="gender" class="w-full p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                  <option value="M" {% if get_labour_personal_info.gender == 'M' %} selected {% endif %}>Male</option>
+                  <option value="F" {% if get_labour_personal_info.gender == 'F' %} selected {% endif %}>Female</option>
+                  <option value="O" {% if get_labour_personal_info.gender == 'O' %} selected {% endif %}>Other</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Date of Birth -->
+            <tr>
+              <td class="border border-gray-300 px-4 py-2 font-medium">Date of birth</td>
+              <td class="border border-gray-300 px-4 py-2">
+                <input type="date" name="dob" value="{{ get_labour_personal_info.date_of_birth|date:'Y-m-d' }}" class="w-full p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+              </td>
+            </tr>
+
+            <!-- Submit Button -->
+            <tr>
+              <td colspan="2" class="border border-gray-300 px-4 py-2 text-center">
+                <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600">Update</button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('profile_image');
+  const previewImage = document.getElementById('profile-preview');
+
+  // Highlight dropzone on drag events
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('bg-blue-50');
+  });
+
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('bg-blue-50');
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('bg-blue-50');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      fileInput.files = e.dataTransfer.files;
+      previewImageFile(file);
+    } else {
+      alert('Please upload an image file.');
+    }
+  });
+
+  dropzone.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      previewImageFile(file);
+    } else {
+      alert('Please upload an image file.');
+    }
+  });
+
+  function previewImageFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImage.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+</script>
 
 {% endblock %}
