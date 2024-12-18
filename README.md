@@ -274,3 +274,25 @@ Labour -
             * otp
             * new-password
             * confirm-password
+
+
+  PARTIES:
+    - Insert
+    - Read
+    - Update
+    - Delete
+    - Search (Optional)
+
+
+API'S planning
+
+ListAPI
+- add new resource 
+- get all resource
+
+DetailAPI
+- get specific resource
+- update specific resource with all fileds are required
+- update specific resource with partial fileds are required
+- delete specific resource
+

@@ -45,10 +45,11 @@ CUSTOM_APPS = [
     'LLApps.master',
     'LLApps.dashboard',
     'LLApps.labour',
+    'LLApps.parties',
 ]
 
 THIRD_PARTIES_APPS = [
-
+    'rest_framework'
 ]
 
 INSTALLED_APPS += CUSTOM_APPS
