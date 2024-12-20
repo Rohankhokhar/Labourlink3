@@ -24,9 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-)#^&pn45mmlk1zpn^($-f&9++v1egt42tl124x(oih6rsl@ffo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -96,6 +97,18 @@ DATABASES = {
         'NAME': BASE_DIR / 'LLdb_local.db',
     }
 }
+
+if not DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'llapps$llapps',
+            'USER': 'llapps',
+            'PASSWORD': 'Test@1234',
+            'HOST': 'llapps.mysql.pythonanywhere-services.com',
+            'PORT': '3306', 
+        }
+    }
 
 
 # Password validation
