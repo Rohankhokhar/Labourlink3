@@ -10,6 +10,7 @@ from functools import wraps
 
 import time
 import jwt
+import requests
 # Create your views here.
 
 def get_labour_from_session(request):
@@ -211,7 +212,14 @@ def dashboard_view(request):
     return render(request, 'dashboard/dashboard.html')
 @login_required
 def parties_view(request):
-    return render(request, 'dashboard/parties.html')
+    labour_id = request.session['LL_labour_id']
+    partyListAPI = f'https://llapps.pythonanywhere.com/api/parties/?labour={labour_id}'
+    response = requests.get(partyListAPI)
+    if response.status_code == 200:
+        parties = response.json()
+        return render(request, 'dashboard/parties.html', {'parties': parties})
+    
+
 @login_required
 def tasks_view(request):
     return render(request, 'dashboard/tasks.html')

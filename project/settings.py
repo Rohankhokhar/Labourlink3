@@ -50,7 +50,7 @@ CUSTOM_APPS = [
 ]
 
 THIRD_PARTIES_APPS = [
-    'rest_framework'
+    'rest_framework',
 ]
 
 INSTALLED_APPS += CUSTOM_APPS
@@ -68,6 +68,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'project.urls'
+
+
 
 TEMPLATES = [
     {
@@ -91,24 +93,23 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'LLdb_local.db',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'LLdb_local.db',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'llapps$llapps',
+        'USER': 'llapps',
+        'PASSWORD': 'Test@1234',
+        'HOST': 'llapps.mysql.pythonanywhere-services.com',
+        'PORT': '3306', 
     }
 }
-
-if not DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'llapps$llapps',
-            'USER': 'llapps',
-            'PASSWORD': 'Test@1234',
-            'HOST': 'llapps.mysql.pythonanywhere-services.com',
-            'PORT': '3306', 
-        }
-    }
 
 
 # Password validation

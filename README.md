@@ -289,11 +289,15 @@ STATUS_CODE' Docs : https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 
 API'S planning
 
+https://witzcode.pythonanywhere.com/blog-details/06f830c9-8cfd-4b59-ac90-9e3faa51144c_blog
+
 ListAPI
+- https://llapps.pythonanywhere.com/api/parties/
 - add new resource 
 - get all resource
 
 DetailAPI
+- https://llapps.pythonanywhere.com/api/party/{party_id}
 - get specific resource
 - update specific resource with all fileds are required
 - update specific resource with partial fileds are required

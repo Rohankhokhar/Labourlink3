@@ -8,7 +8,12 @@ from LLApps.parties.serializers import PartyDetailSerializers
 @api_view(['GET', 'POST'])
 def PartiesListAPI(request):
     if request.method == 'GET':
-        querySet = PartiesDetail.objects.all()
+        labour_id = request.query_params.get('labour')  # Get the labour ID from query parameters
+        if labour_id:
+            querySet = PartiesDetail.objects.filter(labour_id=labour_id)  # Filter by labour ID
+        else:
+            querySet = PartiesDetail.objects.all()  # Return all entries if no filter is applied
+        
         serializer = PartyDetailSerializers(querySet, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
