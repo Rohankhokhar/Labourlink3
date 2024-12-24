@@ -10,6 +10,7 @@ urlpatterns = [
     path('logout/', logout, name='logout'),
     path('dashboard/', dashboard_view, name='dashboard_view'),
     path('parties/', parties_view, name='parties_view'),
+    path('add-new-party/', add_new_party, name='add_new_party'),
     path('tasks/', tasks_view, name='tasks_view'),
     path('payments/', payments_view, name='payments_view'),
     path('contact/', contact_view, name='contact_view'),

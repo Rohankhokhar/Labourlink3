@@ -19,7 +19,8 @@
     <!-- Form Section -->
     <div class="bg-white p-6 rounded shadow-md">
         <h2 class="text-xl font-semibold mb-4">Add / Filter Parties</h2>
-        <form id="partyForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <form action="{% url 'add_new_party' %}" id="partyForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" method="post">
+            {% csrf_token %}
             <!-- Firm Name -->
             <div>
                 <label class="block text-sm font-medium text-gray-700" for="firm_name">Firm Name</label>
@@ -47,7 +48,7 @@
             </div>
             <!-- Submit Button -->
             <div class="col-span-1 sm:col-span-2 lg:col-span-3 text-right">
-                <button type="button" id="addPartyBtn" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Add Party</button>
+                <button type="submit" id="addPartyBtn" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Add Party</button>
             </div>
         </form>
     </div>
