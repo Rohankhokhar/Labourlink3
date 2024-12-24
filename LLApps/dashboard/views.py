@@ -239,7 +239,7 @@ def add_new_party(request):
             "party_mobile":party_mobile_ ,
             "address": address_,
             "description": description_,
-            "labour": "04e9130c-e004-480e-9597-7a38b7cc6436"
+            "labour": request.session['LL_labour_id']
         }
 
         response = requests.post(partyListAPI, json=party_data)
