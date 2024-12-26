@@ -1,0 +1,93 @@
+{% extends 'dashboard/base.html' %} {% load static %} {% block title %} Edit-Parties
+{% endblock %} {% block style %} {% endblock %} {% block body %}
+
+<header class="bg-indigo-500 text-white p-4">
+    <h1 class="text-center text-2xl font-bold">Edit Party</h1>
+  </header>
+  
+  <div class="container mx-auto my-6 px-4">
+    <!-- Edit Form Section -->
+    <div class="bg-white p-6 rounded shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Update Party Details</h2>
+      <form
+        action=""
+        id="editPartyForm"
+        method="post"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        {% csrf_token %}
+  
+        <!-- Firm Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700" for="firm_name">Firm Name</label>
+          <input
+            type="text"
+            id="firm_name"
+            name="firm_name"
+            value="{{ party.firm_name }}"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          />
+        </div>
+  
+        <!-- Party Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700" for="party_name">Party Name</label>
+          <input
+            type="text"
+            id="party_name"
+            name="party_name"
+            value="{{ party.party_name }}"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          />
+        </div>
+  
+        <!-- Party Mobile -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700" for="party_mobile">Party Mobile</label>
+          <input
+            type="text"
+            id="party_mobile"
+            name="party_mobile"
+            value="{{ party.party_mobile }}"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          />
+        </div>
+  
+        <!-- Address -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700" for="address">Address</label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            value="{{ party.address }}"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          />
+        </div>
+  
+        <!-- Description -->
+        <div class="sm:col-span-2 lg:col-span-3">
+          <label class="block text-sm font-medium text-gray-700" for="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          >{{ party.description }}</textarea>
+        </div>
+  
+        <!-- Submit Button -->
+        <div class="col-span-1 sm:col-span-2 lg:col-span-3 text-right">
+          <button
+            type="submit"
+            id="updatePartyBtn"
+            class="bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600"
+          >
+            Update Party
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}

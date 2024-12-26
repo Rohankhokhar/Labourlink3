@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from LLApps.dashboard.forms import contactRequestForm
 from LLApps.labour.models import Labour, LabourPersonalInformation
 from LLApps.master.helpers import validators, emails, tokens, sms, unique
+from LLApps.parties.models import PartiesDetail
 from functools import wraps
 
 import time
@@ -14,6 +15,8 @@ import jwt
 import requests
 import json
 # Create your views here.
+
+LOCAL_SERVER = 'http://127.0.0.1:8000'
 
 def get_labour_from_session(request):
     llid = Labour.objects.get(llid=request.session['LL_labour_id'])
@@ -211,11 +214,16 @@ def verify_otp_view(request):
 
 @login_required
 def dashboard_view(request):
-    return render(request, 'dashboard/dashboard.html')
+    labour_id_ = request.session['LL_labour_id']
+    total_parties = PartiesDetail.objects.filter(labour_id=labour_id_).count()
+    context = {
+        'total_parties': total_parties,
+    }
+    return render(request, 'dashboard/dashboard.html', context)
 @login_required
 def parties_view(request):
     labour_id = request.session['LL_labour_id']
-    partyListAPI = f'https://llapps.pythonanywhere.com/api/parties/?labour={labour_id}'
+    partyListAPI = f'{LOCAL_SERVER}/api/parties/?labour={labour_id}'
     response = requests.get(partyListAPI)
     if response.status_code == 200:
         parties = response.json()
@@ -231,7 +239,7 @@ def add_new_party(request):
         address_ = request.POST['address']
         description_ = request.POST['description']
 
-        partyListAPI = 'https://llapps.pythonanywhere.com/api/parties/'
+        partyListAPI = f'{LOCAL_SERVER}/api/parties/'
             
         party_data = {
             "firm_name": firm_name_,
@@ -248,7 +256,68 @@ def add_new_party(request):
             messages.success(request, 'Party added successfully.')
             return redirect('parties_view')
 
+@login_required
+def edit_party(request, party_id):
+    partyDetailAPI = f'{LOCAL_SERVER}/api/party/{party_id}'
 
+    # Handle POST request (Update the party)
+    if request.method == 'POST':
+        # Safely retrieve form data
+        firm_name_ = request.POST.get('firm_name', '')
+        party_name_ = request.POST.get('party_name', '')
+        party_mobile_ = request.POST.get('party_mobile', '')
+        address_ = request.POST.get('address', '')
+        description_ = request.POST.get('description', '')
+
+        party_data = {
+            "firm_name": firm_name_,
+            "party_name": party_name_,
+            "party_mobile": party_mobile_,
+            "address": address_,
+            "description": description_,
+            "labour": request.session['LL_labour_id']  # Assuming there's a labour ID in the session
+        }
+
+        try:
+            # Send PUT request to update the party
+            response = requests.put(partyDetailAPI, json=party_data)
+            print(response)
+            if response.status_code == 200:
+                messages.success(request, 'Party updated successfully.')
+                return redirect('parties_view')
+            else:
+                print(f"Error: {response.status_code}, {response.text}")
+                messages.error(request, 'Failed to update party. Please try again.')
+        except requests.exceptions.RequestException as e:
+            print(f"Request Exception: {e}")
+            messages.error(request, 'Error connecting to the server.')
+
+        # Redirect back to the edit page in case of failure
+        return redirect('edit_party', party_id=party_id)
+
+    # Handle GET request (Fetch party details)
+    try:
+        response = requests.get(partyDetailAPI)
+        if response.status_code == 200:
+            party = response.json()
+            return render(request, 'dashboard/edit_party.html', {'party': party})
+        else:
+            messages.error(request, 'Failed to fetch party details.')
+    except requests.exceptions.RequestException as e:
+        print(f"Request Exception: {e}")
+        messages.error(request, 'Error connecting to the server.')
+
+    # Redirect to the parties list if party details are unavailable
+    return redirect('parties_view')
+    
+
+@login_required
+def delete_party(request, party_id):
+    partyDetailAPI = f'{LOCAL_SERVER}/api/party/{party_id}'
+    response = requests.delete(partyDetailAPI)
+    if response.status_code == 204:
+        messages.success(request, 'Party deleted successfully.')
+        return redirect('parties_view')
     
 
 @login_required
