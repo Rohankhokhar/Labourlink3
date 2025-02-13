@@ -1,0 +1,64 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}
+Tasks
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+
+{% block body %}
+<div class="container mx-auto p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Tasks List</h2>
+
+    <!-- Table -->
+    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table class="min-w-full table-auto">
+            <thead class="bg-indigo-500 text-white">
+                <tr>
+                    <th class="py-3 px-4 text-left">Description</th>
+                    <th class="py-3 px-4 text-left">Amount</th>
+                    <th class="py-3 px-4 text-left">Assigned Date</th>
+                    <th class="py-3 px-4 text-left">Complete Date</th>
+                    <th class="py-3 px-4 text-left">Status</th>
+                    <th class="py-3 px-4 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                {% for task in party %}
+                <tr class="border-b hover:bg-gray-100">
+                    <td class="py-3 px-4">{{ task.task_description }}</td>
+                    <td class="py-3 px-4">{{ task.amount }}</td>
+                    <td class="py-3 px-4">{{ task.assign_date }}</td>
+                    <td class="py-3 px-4">{{ task.complete_date }}</td>
+                    <td class="py-3 px-4">{{ task.is_completed|yesno:"Completed,Pending" }}</td>
+                    <a href="{% url 'edit_party' party_id=party.ido %}" class="text-blue-600 hover:text-blue-700">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                    </a>&nbsp;
+                    <a href="{% url 'delete_party' party_id=party.ido %}" method="POST"
+                        class="text-red-600 hover:text-red-700">
+                        <i class="fa-solid fa-x"></i>
+                    </a>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="py-3 px-4 text-center">No tasks available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="mt-6 text-right">
+        <a href="{% url 'add_task' party_id=party.llid %}"
+            class="inline-block bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600">
+            Add New Task
+        </a>
+        <p class="text-red-500">Error: Party not found.</p>
+    </div>
+</div>
+
+{% endblock %}

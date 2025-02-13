@@ -1,196 +1,135 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %} {% endblock %} | LABOURLINK</title>
-    <link
-      rel="shortcut icon"
-      href="{% static 'dashboard/images/logo.ico' %}"
-      type="image/x-icon"
-    />
-    <!-- Tailwind CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/fontawesome.min.css" integrity="sha512-v8QQ0YQ3H4K6Ic3PJkym91KoeNT5S3PnDKvqnwqFD1oiqIl653crGZplPdU5KKtHjO0QKcQ2aUlQZYjHczkmGw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    {% block style %} {% endblock %}
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %} {% endblock %} | LABOURLINK</title>
+  <link rel="shortcut icon" href="{% static 'dashboard/images/logo.ico' %}" type="image/x-icon" />
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/fontawesome.min.css"
+    integrity="sha512-v8QQ0YQ3H4K6Ic3PJkym91KoeNT5S3PnDKvqnwqFD1oiqIl653crGZplPdU5KKtHjO0QKcQ2aUlQZYjHczkmGw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <body class="bg-gray-100">
-    <!-- Responsive Navbar -->
-    <nav class="bg-white border-gray-200 dark:bg-gray-900 shadow-md">
-      <div
-        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
-      >
-        <!-- Brand Logo -->
-        <a href="{% url 'dashboard_view' %}" class="flex items-center">
-          <img
-            src="{% static 'dashboard/images/logo.png' %}"
-            class="h-16 mr-3"
-            alt="Flowbite Logo"
-          />
-          <span
-            class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-            >Labour <span class="text-indigo-500">Link</span></span
-          >
-        </a>
+  {% block style %} {% endblock %}
+</head>
 
-        <!-- Mobile Menu Button -->
-        <button
-          id="mobile-menu-toggle"
-          type="button"
-          class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-          aria-expanded="false"
-        >
-          <span class="sr-only">Open main menu</span>
-          <svg
-            class="w-5 h-5"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 17 14"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M1 1h15M1 7h15M1 13h15"
-            />
-          </svg>
-        </button>
+<body class="bg-gray-100">
+  <!-- Responsive Navbar -->
+  <nav class="bg-white border-gray-200 dark:bg-gray-900 shadow-md">
+    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+      <!-- Brand Logo -->
+      <a href="{% url 'dashboard_view' %}" class="flex items-center">
+        <img src="{% static 'dashboard/images/logo.png' %}" class="h-16 mr-3" alt="Flowbite Logo" />
+        <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Labour <span
+            class="text-indigo-500">Link</span></span>
+      </a>
 
-        <!-- Navbar Links & User Profile -->
-        <div
-          id="navbar-default"
-          class="hidden flex-col md:flex md:flex-row md:items-center md:space-x-8 w-full md:w-auto mt-4 md:mt-0"
-        >
-          <a
-            href="{% url 'dashboard_view' %}"
-            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
-          >
-            <i class="fas fa-home"></i> Dashboard</a
-          >
-          <a
-            href="{% url 'parties_view' %}"
-            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
-            ><i class="fas fa-users"></i> Parties</a
-          >
-          <a
-            href="{% url 'tasks_view' %}"
-            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
-            ><i class="fa-solid fa-list-check"></i>Tasks</a
-          >
-          <a
-            href="{% url 'payments_view' %}"
-            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
-            ><i class="fa-solid fa-wallet"></i> Payments</a
-          >
-          <a
-            href="{% url 'contact_view' %}"
-            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
-            ><i class="fa-solid fa-phone"></i> contact us</a
-          >
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-toggle" type="button"
+        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        aria-expanded="false">
+        <span class="sr-only">Open main menu</span>
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M1 1h15M1 7h15M1 13h15" />
+        </svg>
+      </button>
 
-          <!-- User Profile Dropdown -->
-          <div class="relative">
-            <button
-              id="user-menu-button"
-              class="flex items-center focus:outline-none"
-            >
-              <img
-                src="{{request.session.LL_profile}}"
-                alt="User Avatar"
-                class="w-10 h-10 rounded-full"
-              />
-              <span class="ml-2 text-gray-900 dark:text-white">{{request.session.LL_name}}</span>
-              <i class="fas fa-chevron-down ml-1 text-gray-500"></i>
-            </button>
+      <!-- Navbar Links & User Profile -->
+      <div id="navbar-default"
+        class="hidden flex-col md:flex md:flex-row md:items-center md:space-x-8 w-full md:w-auto mt-4 md:mt-0">
+        <a href="{% url 'dashboard_view' %}"
+          class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white">
+          <i class="fas fa-home"></i> Dashboard</a>
+        <a href="#" 
+          class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"><i
+            class="fa-solid fa-user"></i> Labour</a>  
+        <a href="{% url 'parties_view' %}"
+          class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"><i
+            class="fas fa-users"></i> Parties</a>
+        <a href="{% url 'tasks_view' %}"
+          class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"><i
+            class="fa-solid fa-list-check"></i>Tasks</a>
+        <a href="{% url 'payments_view' %}"
+          class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"><i
+            class="fa-solid fa-wallet"></i> Payments</a>
+        <a href="{% url 'contact_view' %}"
+          class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"><i
+            class="fa-solid fa-phone"></i> contact us</a>
+        <!-- User Profile Dropdown -->
+        <div class="relative">
+          <button id="user-menu-button" class="flex items-center focus:outline-none">
+            <img src="{{request.session.LL_profile}}" alt="User Avatar" class="w-10 h-10 rounded-full" />
+            <span class="ml-2 text-gray-900 dark:text-white">{{request.session.LL_name}}</span>
+            <i class="fas fa-chevron-down ml-1 text-gray-500"></i>
+          </button>
 
-            <!-- Dropdown Menu -->
-            <div
-              id="user-menu"
-              class="hidden absolute left-0 md:right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden z-10 border-2 border-indigo-500"
-            >
-              <a
-                href="{% url 'profile_view' %}"
-                class="block px-4 py-2 text-gray-900 dark:text-white hover:bg-indigo-100 dark:hover:bg-indigo-700"
-                >Profile</a
-              >
-              <a
-                href="#"
-                class="block px-4 py-2 text-gray-900 dark:text-white hover:bg-indigo-100 dark:hover:bg-indigo-700"
-                >Settings</a
-              >
-              <a
-                href="{% url 'logout' %}"
-                class="block px-4 py-2 text-gray-900 dark:text-white hover:bg-indigo-100 dark:hover:bg-indigo-700"
-                >Logout</a
-              >
-            </div>
+          <!-- Dropdown Menu -->
+          <div id="user-menu"
+            class="hidden absolute left-0 md:right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden z-10 border-2 border-indigo-500">
+            <a href="{% url 'profile_view' %}"
+              class="block px-4 py-2 text-gray-900 dark:text-white hover:bg-indigo-100 dark:hover:bg-indigo-700">Profile</a>
+            <a href="{% url 'logout' %}"
+              class="block px-4 py-2 text-gray-900 dark:text-white hover:bg-indigo-100 dark:hover:bg-indigo-700">Logout</a>
           </div>
         </div>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <!-- message start -->
-    {% if messages %}
-    <ul class="space-y-2">
-      {% for message in messages %}
-      <li
-        class="relative flex items-center justify-between {% if message.tags == 'success' %}text-green-800 bg-green-100 border border-green-400 px-4 py-2 rounded{% endif %} {% if message.tags == 'error' %}text-red-800 bg-red-100 border border-red-400 px-4 py-2 rounded{% endif %} {% if message.tags == 'warning' %}text-yellow-800 bg-yellow-100 border border-yellow-400 px-4 py-2 rounded{% endif %} {% if message.tags == 'info' %}text-blue-800 bg-blue-100 border border-blue-400 px-4 py-2 rounded{% endif %}"
-      >
-        <span>{{ message }}</span>
-        <button
-          type="button"
-          class="text-gray-600 hover:text-gray-900 ml-4"
-          onclick="this.parentElement.style.display='none';"
-        >
-          &times;
-        </button>
-      </li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-    <!-- message end -->
+  <!-- message start -->
+  {% if messages %}
+  <ul class="space-y-2">
+    {% for message in messages %}
+    <li
+      class="relative flex items-center justify-between {% if message.tags == 'success' %}text-green-800 bg-green-100 border border-green-400 px-4 py-2 rounded{% endif %} {% if message.tags == 'error' %}text-red-800 bg-red-100 border border-red-400 px-4 py-2 rounded{% endif %} {% if message.tags == 'warning' %}text-yellow-800 bg-yellow-100 border border-yellow-400 px-4 py-2 rounded{% endif %} {% if message.tags == 'info' %}text-blue-800 bg-blue-100 border border-blue-400 px-4 py-2 rounded{% endif %}">
+      <span>{{ message }}</span>
+      <button type="button" class="text-gray-600 hover:text-gray-900 ml-4"
+        onclick="this.parentElement.style.display='none';">
+        &times;
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <!-- message end -->
 
-    {% block body %} {% endblock %}
+  {% block body %} {% endblock %}
 
-    <script>
-      // Mobile menu toggle
-      const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
-      const navbar = document.getElementById("navbar-default");
-      mobileMenuToggle.addEventListener("click", () => {
-        navbar.classList.toggle("hidden");
-      });
+  <script>
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+    const navbar = document.getElementById("navbar-default");
+    mobileMenuToggle.addEventListener("click", () => {
+      navbar.classList.toggle("hidden");
+    });
 
-      // User menu dropdown toggle
-      const userMenuButton = document.getElementById("user-menu-button");
-      const userMenu = document.getElementById("user-menu");
-      userMenuButton.addEventListener("click", (e) => {
-        e.stopPropagation(); // Prevent click event from bubbling up
-        userMenu.classList.toggle("hidden");
-      });
+    // User menu dropdown toggle
+    const userMenuButton = document.getElementById("user-menu-button");
+    const userMenu = document.getElementById("user-menu");
+    userMenuButton.addEventListener("click", (e) => {
+      e.stopPropagation(); // Prevent click event from bubbling up
+      userMenu.classList.toggle("hidden");
+    });
 
-      // Close the user menu if clicking outside of it
-      document.addEventListener("click", (e) => {
-        if (
-          !userMenu.contains(e.target) &&
-          !userMenuButton.contains(e.target)
-        ) {
-          userMenu.classList.add("hidden");
-        }
-      });
-    </script>
-  </body>
+    // Close the user menu if clicking outside of it
+    document.addEventListener("click", (e) => {
+      if (
+        !userMenu.contains(e.target) &&
+        !userMenuButton.contains(e.target)
+      ) {
+        userMenu.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+
 </html>

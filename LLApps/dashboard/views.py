@@ -1,14 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect , get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse , HttpResponse
 
 from LLApps.dashboard.forms import contactRequestForm
 from LLApps.labour.models import Labour, LabourPersonalInformation
 from LLApps.master.helpers import validators, emails, tokens, sms, unique
-from LLApps.parties.models import PartiesDetail
+from LLApps.parties.models import PartiesDetail , Task , Payment
 from functools import wraps
+from django.utils.timezone import now
+from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 
 import time
 import jwt
@@ -220,6 +222,7 @@ def dashboard_view(request):
         'total_parties': total_parties,
     }
     return render(request, 'dashboard/dashboard.html', context)
+
 @login_required
 def parties_view(request):
     labour_id = request.session['LL_labour_id']
@@ -228,26 +231,27 @@ def parties_view(request):
     if response.status_code == 200:
         parties = response.json()
         return render(request, 'dashboard/parties.html', {'parties': parties})
+    return render(request, 'dashboard/parties.html')
 
 @csrf_exempt
 @login_required
 def add_new_party(request):
     if request.method == 'POST':
-        firm_name_ = request.POST['firm_name']
-        party_name_ = request.POST['party_name']
-        party_mobile_ = request.POST['party_mobile']
-        address_ = request.POST['address']
-        description_ = request.POST['description']
+        firm_name_ = request.POST.get('firm_name', '').strip()
+        party_name_ = request.POST.get('party_name', '').strip()
+        party_mobile_ = request.POST.get('party_mobile', '').strip()
+        address_ = request.POST.get('address', '').strip()
+        description_ = request.POST.get('description', '').strip()
 
         partyListAPI = f'{LOCAL_SERVER}/api/parties/'
             
         party_data = {
             "firm_name": firm_name_,
             "party_name": party_name_,
-            "party_mobile":party_mobile_ ,
+            "party_mobile": party_mobile_,
             "address": address_,
             "description": description_,
-            "labour": request.session['LL_labour_id']
+            "labour": request.session.get('LL_labour_id') 
         }
 
         response = requests.post(partyListAPI, json=party_data)
@@ -255,6 +259,13 @@ def add_new_party(request):
         if response.status_code == 201:
             messages.success(request, 'Party added successfully.')
             return redirect('parties_view')
+
+        # ❌ API request failed, return an error response
+        messages.error(request, 'Failed to add party. Please try again.')
+        return redirect('parties_view')  # Redirect to the form again with an error message
+
+    # ❌ Invalid request method (not POST)
+    return HttpResponse("Invalid request method", status=405)
 
 @login_required
 def edit_party(request, party_id):
@@ -313,16 +324,16 @@ def edit_party(request, party_id):
 
 @login_required
 def delete_party(request, party_id):
-    partyDetailAPI = f'{LOCAL_SERVER}/api/party/{party_id}'
-    response = requests.delete(partyDetailAPI)
-    if response.status_code == 204:
-        messages.success(request, 'Party deleted successfully.')
-        return redirect('parties_view')
-    
+        partyDetailAPI = f'{LOCAL_SERVER}/api/party/{party_id}'
+        response = requests.delete(partyDetailAPI)
 
-@login_required
-def tasks_view(request):
-    return render(request, 'dashboard/tasks.html')
+        if response.status_code == 204:
+            messages.success(request, 'Party deleted successfully.')
+        else:
+            messages.error(request, 'Failed to delete the party. Please try again later.')
+
+        return redirect('parties_view')
+
 @login_required
 def payments_view(request):
     return render(request, 'dashboard/payments.html')
@@ -389,3 +400,73 @@ def update_profile_view(request):
         'get_labour_personal_info': get_labour_from_session(request)[1]
     }
     return render(request, 'dashboard/update-profile.html', context)
+
+
+
+
+
+
+
+
+def party_tasks_payments(request, party_id):
+    party = get_object_or_404(PartiesDetail, id=party_id)
+    tasks = Task.objects.filter(party=party)
+    payments = Payment.objects.filter(task__party=party)
+
+    return render(request, 'dashboard/task_payment.html', {
+        'party': party,
+        'tasks': tasks,
+        'payments': payments,
+    })
+
+def tasks_view(request):
+    tasks = Task.objects.all()
+    return render(request, "dashboard/task_read.html", {"tasks": tasks})
+
+@login_required
+def add_task(request, party_id):
+    party = get_object_or_404(PartiesDetail, pk=party_id)
+    
+    if request.method == "POST":
+        task_description_ = request.POST.get("task_description")
+        amount_ = request.POST.get("amount")
+        complete_date_ = request.POST.get("complete_date")
+
+        if not task_description_ or not amount_:
+            messages.error(request, "Task description and amount are required.")
+        else:
+            task = Task.objects.create(
+                party=party,
+                task_description=task_description_,
+                amount=amount_,
+                complete_date=complete_date_ if complete_date_ else None,
+                is_completed=False
+            )
+            print(party.llid)
+            messages.success(request, "Task added successfully.")
+            return redirect("tasks_view", party_id=party.llid) 
+
+    return render(request, "dashboard/task_read.html", {"party": party, "task": task})
+
+
+
+
+# View for adding a Payment
+# def add_payment(request, task_id):
+#     task = get_object_or_404(Task, id=task_id)
+    
+#     if request.method == "POST":
+#         received_amount = request.POST.get("received_amount")
+
+#         if not received_amount:
+#             messages.error(request, "Received amount is required.")
+#         else:
+#             Payment.objects.create(
+#                 task=task,
+#                 received_amount=received_amount,
+#                 payment_date=now().date(),
+#             )
+#             messages.success(request, "Payment recorded successfully.")
+#             return redirect("party_tasks_payments", party_id=task.party.id)
+
+#     return render(request, "dashboard/add_payment.html", {"task": task})

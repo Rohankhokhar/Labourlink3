@@ -1,13 +1,35 @@
 {% extends 'dashboard/base.html' %}
-{% load static %}
-
-{% block title %}
-    Tasks
-{% endblock %}
-
-{% block style %}
-{% endblock %}
-
+{% block title %}Add Task{% endblock %}
 
 {% block body %}
+<header class="bg-indigo-500 text-white p-4">
+  <h1 class="text-center text-2xl font-bold">Add Task for {{ party.firm_name }}</h1>
+</header>
+
+<div class="container mx-auto my-6 px-4">
+  <div class="bg-white p-6 rounded shadow-md w-full lg:w-2/3">
+    <h2 class="text-xl font-semibold mb-4">New Task Details</h2>
+    
+
+    <form action="{% url 'add_task' party_id=party.id %}" method="POST">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label for="task_description" class="block text-sm font-medium text-gray-700">Task Description</label>
+        <textarea id="task_description" name="task_description" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" required></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+        <input type="number" id="amount" name="amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" required>
+      </div>
+
+      <div class="mb-4">
+        <label for="complete_date" class="block text-sm font-medium text-gray-700">Complete Date (Optional)</label>
+        <input type="date" id="complete_date" name="complete_date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
+      </div>
+
+      <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Add Task</button>
+    </form>
+  </div>
+</div>
 {% endblock %}
