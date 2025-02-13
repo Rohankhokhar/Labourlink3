@@ -25,6 +25,7 @@
             <th class="border border-gray-300 px-4 py-2">Mobile</th>
             <th class="border border-gray-300 px-4 py-2">Address</th>
             <th class="border border-gray-300 px-4 py-2">Description</th>
+            <th class="border border-gray-300 px-4 py-2">Add task</th>
             <th class="border border-gray-300 px-4 py-2">Actions</th>
             <!-- <th class="border border-gray-300 px-4 py-2">Show Details</th> -->
           </tr>
@@ -38,6 +39,11 @@
             <td class="border border-gray-300 px-4 py-2">{{ party.party_mobile }}</td>
             <td class="border border-gray-300 px-4 py-2">{{ party.address }}</td>
             <td class="border border-gray-300 px-4 py-2">{{ party.description }}</td>
+            <td class="border border-gray-300 px-4 py-2">
+              <a href="{% url 'add_task' party_id=party.llid %}" class="text-blue-600 hover:text-blue-700">
+                <i class="fa-regular fa-pen-to-square"></i>
+              </a>
+            </td>
             <td class="border border-gray-300 px-4 py-2">
               <a href="{% url 'edit_party' party_id=party.llid %}" class="text-blue-600 hover:text-blue-700">
                 <i class="fa-regular fa-pen-to-square"></i>

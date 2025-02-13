@@ -426,7 +426,8 @@ def tasks_view(request):
 @login_required
 def add_task(request, party_id):
     party = get_object_or_404(PartiesDetail, pk=party_id)
-    
+    task = None  # Initialize task to None before checking for POST request
+
     if request.method == "POST":
         task_description_ = request.POST.get("task_description")
         amount_ = request.POST.get("amount")
@@ -442,11 +443,14 @@ def add_task(request, party_id):
                 complete_date=complete_date_ if complete_date_ else None,
                 is_completed=False
             )
-            print(party.llid)
             messages.success(request, "Task added successfully.")
-            return redirect("tasks_view", party_id=party.llid) 
+            return redirect("tasks_view", party_id=party.llid)
 
-    return render(request, "dashboard/task_read.html", {"party": party, "task": task})
+    # Now task is always defined, pass it to the template
+    return render(request, "dashboard/tasks.html", {"party": party, "task": task})
+
+
+
 
 
 

@@ -34,10 +34,10 @@ Tasks
                     <td class="py-3 px-4">{{ task.assign_date }}</td>
                     <td class="py-3 px-4">{{ task.complete_date }}</td>
                     <td class="py-3 px-4">{{ task.is_completed|yesno:"Completed,Pending" }}</td>
-                    <a href="{% url 'edit_party' party_id=party.ido %}" class="text-blue-600 hover:text-blue-700">
+                    <a href="{% url 'edit_party' party_id=party.llid %}" class="text-blue-600 hover:text-blue-700">
                         <i class="fa-regular fa-pen-to-square"></i>
                     </a>&nbsp;
-                    <a href="{% url 'delete_party' party_id=party.ido %}" method="POST"
+                    <a href="{% url 'delete_party' party_id=party.llid %}" method="POST"
                         class="text-red-600 hover:text-red-700">
                         <i class="fa-solid fa-x"></i>
                     </a>
@@ -51,14 +51,6 @@ Tasks
         </table>
     </div>
 
-
-    <div class="mt-6 text-right">
-        <a href="{% url 'add_task' party_id=party.llid %}"
-            class="inline-block bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600">
-            Add New Task
-        </a>
-        <p class="text-red-500">Error: Party not found.</p>
-    </div>
 </div>
 
 {% endblock %}

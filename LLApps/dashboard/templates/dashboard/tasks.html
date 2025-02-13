@@ -11,7 +11,7 @@
     <h2 class="text-xl font-semibold mb-4">New Task Details</h2>
     
 
-    <form action="{% url 'add_task' party_id=party.id %}" method="POST">
+    <form action="{% url 'add_task' party_id=party.llid %}" method="POST">
       {% csrf_token %}
       <div class="mb-4">
         <label for="task_description" class="block text-sm font-medium text-gray-700">Task Description</label>
