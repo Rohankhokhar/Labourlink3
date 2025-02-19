@@ -5,12 +5,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse , HttpResponse
 
 from LLApps.dashboard.forms import contactRequestForm
-from LLApps.labour.models import Labour, LabourPersonalInformation
+from LLApps.labour.models import Labour, LabourPersonalInformation , LabourWorker , DailyAttendance , MonthlySalary
 from LLApps.master.helpers import validators, emails, tokens, sms, unique
-from LLApps.parties.models import PartiesDetail , Task , Payment
+from LLApps.parties.models import PartiesDetail , Task 
+from .forms import TaskForm
 from functools import wraps
 from django.utils.timezone import now
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed
+from datetime import datetime
+from django.db.models import Count, Q
+from django.db.models import Sum
 
 import time
 import jwt
@@ -218,8 +222,13 @@ def verify_otp_view(request):
 def dashboard_view(request):
     labour_id_ = request.session['LL_labour_id']
     total_parties = PartiesDetail.objects.filter(labour_id=labour_id_).count()
+    total_task = Task.objects.count()
+    total_labours = LabourWorker.objects.count()  
+    total_payment = Task.objects.filter()
     context = {
         'total_parties': total_parties,
+        'total_task' : total_task,
+        'total_labour': total_labours,
     }
     return render(request, 'dashboard/dashboard.html', context)
 
@@ -232,6 +241,26 @@ def parties_view(request):
         parties = response.json()
         return render(request, 'dashboard/parties.html', {'parties': parties})
     return render(request, 'dashboard/parties.html')
+
+def party_tasks_view(request, party_id):
+    """View to list all tasks for a particular party with filter."""
+    party = get_object_or_404(PartiesDetail, llid=party_id)
+    filter_type = request.GET.get("filter", "all")  # Default is "all"
+
+    # Filtering tasks based on selected filter
+    tasks = Task.objects.filter(party=party)
+    if filter_type == "completed":
+        tasks = tasks.filter(task_complete=True)
+    elif filter_type == "not_completed":
+        tasks = tasks.filter(task_complete=False)
+    elif filter_type == "pending":
+        tasks = tasks.filter(pending_amount__gt=0)
+
+    return render(
+        request,
+        "dashboard/parties_task.html",
+        {"party": party, "tasks": tasks, "filter_type": filter_type},
+    )
 
 @csrf_exempt
 @login_required
@@ -265,7 +294,7 @@ def add_new_party(request):
         return redirect('parties_view')  # Redirect to the form again with an error message
 
     # ❌ Invalid request method (not POST)
-    return HttpResponse("Invalid request method", status=405)
+    return render(request, 'dashboard/parties_create.html')
 
 @login_required
 def edit_party(request, party_id):
@@ -403,25 +432,36 @@ def update_profile_view(request):
 
 
 
+def tasks_view(request):
+    # Get filter from request
+    filter_type = request.GET.get('filter', 'all')
 
+    # Fetch tasks based on filter
+    tasks = Task.objects.all()
 
+    if filter_type == 'completed':
+        tasks = tasks.filter(task_complete=True)
+    elif filter_type == 'not_completed':
+        tasks = tasks.filter(task_complete=False)
+    elif filter_type == 'pending':
+        tasks = tasks.filter(pending_amount__gt=0)
 
+    # Task counts
+    incomplete_task_count = Task.objects.filter(task_complete=False).count()
+    completed_task_count = Task.objects.filter(task_complete=True).count()
+    pending_amount_task_count = Task.objects.filter(pending_amount__gt=0).count()
+    total_pending_amount = Task.objects.aggregate(Sum("pending_amount"))["pending_amount__sum"] or 0
 
-
-def party_tasks_payments(request, party_id):
-    party = get_object_or_404(PartiesDetail, id=party_id)
-    tasks = Task.objects.filter(party=party)
-    payments = Payment.objects.filter(task__party=party)
-
-    return render(request, 'dashboard/task_payment.html', {
-        'party': party,
-        'tasks': tasks,
-        'payments': payments,
+    return render(request, "dashboard/task_read.html", {
+        "tasks": tasks,
+        "incomplete_task_count": incomplete_task_count,
+        "completed_task_count": completed_task_count,
+        "pending_amount_task_count": pending_amount_task_count,
+        "total_pending_amount": total_pending_amount,
+        "filter_type": filter_type,  # Pass filter type to template
     })
 
-def tasks_view(request):
-    tasks = Task.objects.all()
-    return render(request, "dashboard/task_read.html", {"tasks": tasks})
+
 
 @login_required
 def add_task(request, party_id):
@@ -429,48 +469,259 @@ def add_task(request, party_id):
     task = None  # Initialize task to None before checking for POST request
 
     if request.method == "POST":
-        task_description_ = request.POST.get("task_description")
-        amount_ = request.POST.get("amount")
-        complete_date_ = request.POST.get("complete_date")
+        form = TaskForm(request.POST)
 
-        if not task_description_ or not amount_:
-            messages.error(request, "Task description and amount are required.")
-        else:
-            task = Task.objects.create(
-                party=party,
-                task_description=task_description_,
-                amount=amount_,
-                complete_date=complete_date_ if complete_date_ else None,
-                is_completed=False
-            )
+        if form.is_valid():
+            task = form.save(commit=False)  # Create the task but don't save yet
+            task.party = party  # Set the related party automatically
+            task.save()  # Save the task to the database
             messages.success(request, "Task added successfully.")
-            return redirect("tasks_view", party_id=party.llid)
+            return redirect("parties_view")
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = TaskForm()  # Initialize an empty form
 
-    # Now task is always defined, pass it to the template
-    return render(request, "dashboard/tasks.html", {"party": party, "task": task})
+    return render(request, "dashboard/tasks.html", {"party": party, "form": form})
 
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
 
-
-
-
-
-
-# View for adding a Payment
-# def add_payment(request, task_id):
-#     task = get_object_or_404(Task, id=task_id)
+    task.delete()
     
-#     if request.method == "POST":
-#         received_amount = request.POST.get("received_amount")
+    return redirect('tasks_view') 
 
-#         if not received_amount:
-#             messages.error(request, "Received amount is required.")
-#         else:
-#             Payment.objects.create(
-#                 task=task,
-#                 received_amount=received_amount,
-#                 payment_date=now().date(),
-#             )
-#             messages.success(request, "Payment recorded successfully.")
-#             return redirect("party_tasks_payments", party_id=task.party.id)
+def update_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
 
-#     return render(request, "dashboard/add_payment.html", {"task": task})
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()  # Save the updated task
+            return redirect('tasks_view')  # Redirect to the task view page after saving
+    else:
+        form = TaskForm(instance=task)  # Pre-fill the form with the task's data
+
+    return render(request, 'dashboard/task_update.html', {'form': form, 'task': task})
+
+
+def labour_read(request):
+    current_month = now().month
+    current_year = now().year
+
+    workers = LabourWorker.objects.all()
+
+    for worker in workers:
+        # Ensure MonthlySalary exists for this worker
+        salary_record, _ = MonthlySalary.objects.get_or_create(
+            worker=worker, month=current_month, year=current_year,
+            defaults={'calculated_salary': 0, 'paid': False, 'payment_date': None}
+        )
+
+        # Ensure salary is calculated
+        salary_record.calculate_salary()
+
+        # Attach correct salary info to the worker for display
+        worker.present_days = DailyAttendance.objects.filter(
+            worker=worker, date__month=current_month, date__year=current_year, status="Present"
+        ).count()
+        worker.calculated_salary = salary_record.calculated_salary
+        worker.salary_paid = salary_record.paid
+        worker.payment_date = salary_record.payment_date
+
+    return render(request, 'dashboard/labour_read.html', {"data": workers})
+
+
+
+
+
+
+# Create Labour Worker View (Using Python code)
+def create_labour_worker(request):
+    if request.method == 'POST':
+        # Get the data from the POST request (You can change it as per your request data)
+        name = request.POST.get('name')
+        mobile_number = request.POST.get('mobile_number')
+        email = request.POST.get('email')
+        labour_description = request.POST.get('labour_description')
+        joining_date_str = request.POST.get('joining_date') 
+        joining_date = datetime.strptime(joining_date_str, '%Y-%m-%d').date()
+        salary = request.POST.get('salary')
+
+        # Get the Labour object (Assuming you know the Labour id, here we use the first one as an example)
+        labour = Labour.objects.first()  # Change this as per your actual case
+
+        # Create the new LabourWorker object
+        new_worker = LabourWorker(
+            labour=labour,
+            name=name,
+            mobile_number=mobile_number,
+            email=email,
+            labour_description=labour_description,
+            joining_date=joining_date,
+            salary=salary,
+            total_days=0,  # Default value, you can adjust this as needed
+            present_days=0  # Default value, you can adjust this as needed
+        )
+        # Save the new LabourWorker to the database
+        new_worker.save()
+
+        # Optionally, redirect to a success page or return a response
+        return redirect('labour_read')
+
+    return render(request, 'dashboard/labour_create.html')  # Render the form to create a new worker
+
+def labour_update(request, worker_id):
+    # Get the worker object from the database
+    worker = get_object_or_404(LabourWorker, id=worker_id)
+
+    if request.method == 'POST':
+        # Get form data
+        name = request.POST.get('name')
+        mobile_number = request.POST.get('mobile_number')
+        email = request.POST.get('email')
+        labour_description = request.POST.get('labour_description')
+        joining_date_str = request.POST.get('joining_date')
+        salary = request.POST.get('salary')
+
+        # Convert the date safely
+        joining_date = datetime.strptime(joining_date_str, '%Y-%m-%d').date() if joining_date_str else worker.joining_date
+
+        # Update the worker object
+        worker.name = name
+        worker.mobile_number = mobile_number
+        worker.email = email
+        worker.labour_description = labour_description
+        worker.joining_date = joining_date
+        worker.salary = float(salary) if salary else worker.salary  # Convert salary safely
+
+        # Save changes
+        worker.save()
+
+        return redirect('labour_read')  # Redirect to the worker list
+
+    # Pass 'worker' to the template
+    return render(request, 'dashboard/labour_update.html', {'worker': worker}) 
+        
+
+
+def labour_delete(request , worker_id):
+    labour = get_object_or_404(LabourWorker, id=worker_id)
+
+    labour.delete()
+
+    return redirect('labour_read')
+
+
+def mark_attendance(request, worker_id):
+    worker = get_object_or_404(LabourWorker, id=worker_id)
+    today = now().date()  # Get the current date
+
+    if request.method == "POST":
+        date_str = request.POST.get("date", str(today))  # Get date as string
+        date = datetime.strptime(date_str, "%Y-%m-%d").date()  # Get date from form or default to today
+        status = request.POST.get("status")  # Get attendance status
+
+        if status not in ["Present", "Absent"]:
+            messages.error(request, "Invalid status selected.")
+            return render(request, "mark_attendance.html", {"worker": worker, "today": today})
+
+        # Check if attendance already exists
+        existing_attendance = DailyAttendance.objects.filter(worker=worker, date=date).first()
+
+        if existing_attendance:
+            existing_attendance.status = status  # Update existing attendance
+            existing_attendance.save()
+            messages.success(request, "Attendance updated successfully!")
+        else:
+            # Create new attendance record
+            DailyAttendance.objects.create(worker=worker, date=date, status=status)
+            messages.success(request, "Attendance recorded successfully!")
+
+        return redirect("labour_read")
+
+    return render(request, "dashboard/mark_attendance.html", {"worker": worker, "today": today})
+
+
+def generate_salary(request, worker_id):
+    """Generate or update the monthly salary record for a worker."""
+    worker = get_object_or_404(LabourWorker, id=worker_id)
+    current_month = now().month
+    current_year = now().year
+
+    # Check if a salary record already exists
+    salary_record, created = MonthlySalary.objects.get_or_create(
+        worker=worker,
+        month=current_month,
+        year=current_year
+    )
+
+    # Calculate salary based on attendance
+    salary_record.calculate_salary()
+    salary_record.save()
+
+    if created:
+        messages.success(request, f"Salary record for {worker.name} ({current_month}/{current_year}) created successfully!")
+    else:
+        messages.info(request, f"Salary record for {worker.name} updated.")
+
+    return redirect("salary_list")
+
+
+def salary_list(request):
+    """Display all worker salaries."""
+    salaries = MonthlySalary.objects.all().order_by("-year", "-month")
+    return render(request, "dashboard/labour_salary.html", {"salaries": salaries})
+
+def pay_salary(request, worker_id):
+    current_month = now().month
+    current_year = now().year
+
+    salary_record = get_object_or_404(MonthlySalary, worker_id=worker_id, month=current_month, year=current_year)
+
+    # ✅ Ensure salary is calculated before marking as paid
+    if salary_record.calculated_salary == 0:
+        salary_record.calculate_salary()
+
+    if not salary_record.paid:
+        salary_record.mark_paid()
+        messages.success(request, f"Salary for {salary_record.worker.name} marked as paid!")
+    else:
+        messages.warning(request, "This salary is already marked as paid.")
+
+    return redirect("labour_read")
+
+
+
+def undo_salary_payment(request, worker_id):
+    """Undo salary payment and mark it as unpaid."""
+    current_month = now().month
+    current_year = now().year
+
+    salary_record = get_object_or_404(
+        MonthlySalary, worker_id=worker_id, month=current_month, year=current_year
+    )
+
+    if salary_record.paid:  # Only allow undoing if it's already paid
+        salary_record.paid = False
+        salary_record.payment_date = None  # Remove payment date
+        salary_record.save()
+
+        messages.success(request, f"Payment for {salary_record.worker.name} has been undone.")
+    else:
+        messages.warning(request, "This salary is already unpaid.")
+
+    return redirect("labour_read")
+
+
+
+
+
+
+
+
+
+
+
+
+

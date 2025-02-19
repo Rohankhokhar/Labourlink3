@@ -1,0 +1,51 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Worker Attendance{% endblock %}
+
+{% block body %}
+<div class="max-w-lg mx-auto bg-white p-6 mt-8 rounded-lg shadow-md border border-gray-300">
+  <h2 class="text-xl font-semibold text-gray-700 text-center mb-4">
+    Mark Attendance for {{ worker.name }}
+  </h2>
+  
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+
+    <!-- Date Input -->
+    <div>
+      <label for="date" class="block text-sm font-medium text-gray-600">Date:</label>
+      <input type="date" name="date" value="{{ today }}" required
+        class="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>
+
+    <!-- Status Selection -->
+    <div>
+      <label class="block text-sm font-medium text-gray-600">Status:</label>
+      <div class="flex items-center space-x-4 mt-2">
+        <label class="flex items-center">
+          <input type="radio" name="status" value="Present" required class="form-radio text-blue-600">
+          <span class="ml-2 text-gray-700">Present</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="status" value="Absent" required class="form-radio text-red-600">
+          <span class="ml-2 text-gray-700">Absent</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit"
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md">
+      Save Attendance
+    </button>
+  </form>
+
+  <!-- Back to Dashboard -->
+  <div class="text-center mt-4">
+    <a href="{% url 'labour_read' %}" class="text-blue-600 hover:underline text-sm font-medium">
+      ← Back to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}
+

@@ -9,27 +9,82 @@
 <div class="container mx-auto my-6 px-4">
   <div class="bg-white p-6 rounded shadow-md w-full lg:w-2/3">
     <h2 class="text-xl font-semibold mb-4">New Task Details</h2>
-    
 
     <form action="{% url 'add_task' party_id=party.llid %}" method="POST">
       {% csrf_token %}
+
+      <!-- Task Description -->
       <div class="mb-4">
         <label for="task_description" class="block text-sm font-medium text-gray-700">Task Description</label>
         <textarea id="task_description" name="task_description" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" required></textarea>
       </div>
-      
+
+      <!-- Amount -->
       <div class="mb-4">
         <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
-        <input type="number" id="amount" name="amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" required>
+        <input type="number" id="amount" name="amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" step="0.01" required>
       </div>
 
+      <!-- Received Amount -->
+      <div class="mb-4">
+        <label for="received_amount" class="block text-sm font-medium text-gray-700">Received Amount</label>
+        <input type="number" id="received_amount" name="received_amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" step="0.01" value="0" required>
+      </div>
+
+      <!-- Pending Amount (Auto-Calculated) -->
+      <div class="mb-4">
+        <label for="pending_amount" class="block text-sm font-medium text-gray-700">Pending Amount</label>
+        <input type="number" id="pending_amount" name="pending_amount" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" readonly>
+      </div>
+
+      <!-- Payment Date -->
+      <div class="mb-4">
+        <label for="payment_date" class="block text-sm font-medium text-gray-700">Payment Date (Optional)</label>
+        <input type="date" id="payment_date" name="payment_date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
+      </div>
+
+      <!-- Complete Date -->
       <div class="mb-4">
         <label for="complete_date" class="block text-sm font-medium text-gray-700">Complete Date (Optional)</label>
         <input type="date" id="complete_date" name="complete_date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5">
+      </div>
+
+      <!-- Status (Radio Buttons) -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Task Status</label>
+        <div class="flex space-x-4 mt-2">
+          <label class="inline-flex items-center">
+            <input type="radio" name="status" value="pending" class="form-radio text-blue-600" checked>
+            <span class="ml-2 text-gray-900">Pending</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" name="status" value="completed" class="form-radio text-green-600">
+            <span class="ml-2 text-gray-900">Completed</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" name="status" value="partial" class="form-radio text-yellow-600">
+            <span class="ml-2 text-gray-900">Partially Paid</span>
+          </label>
+        </div>
       </div>
 
       <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Add Task</button>
     </form>
   </div>
 </div>
+
+<!-- JavaScript to Auto-Calculate Pending Amount -->
+<script>
+  document.getElementById('amount').addEventListener('input', calculatePending);
+  document.getElementById('received_amount').addEventListener('input', calculatePending);
+
+  function calculatePending() {
+    let amount = parseFloat(document.getElementById('amount').value) || 0;
+    let received = parseFloat(document.getElementById('received_amount').value) || 0;
+    let pending = amount - received;
+    document.getElementById('pending_amount').value = pending.toFixed(2);
+  }
+</script>
+
 {% endblock %}
+

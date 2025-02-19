@@ -1,7 +1,6 @@
 from django.db import models
 from LLApps.master.models import BaseModel
 from LLApps.labour.models import Labour
-import uuid
 
 class PartiesDetail(BaseModel):
     labour = models.ForeignKey(Labour, on_delete=models.CASCADE, related_name='parties_details')
@@ -20,32 +19,45 @@ class PartiesDetail(BaseModel):
         ordering = ['party_name']
 
 
-
-
-
-# Task Model
-class Task(BaseModel):
-    party = models.ForeignKey(PartiesDetail, on_delete=models.CASCADE)
+class Task(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("completed", "Completed"),
+        ("partial", "Partially Paid"),
+    ]
+    party = models.ForeignKey(PartiesDetail, on_delete=models.CASCADE, related_name="tasks")
     task_description = models.TextField()
     assign_date = models.DateField(auto_now_add=True)
-    complete_date = models.DateField(null=True, blank=True)  # If completed
+    complete_date = models.DateField(null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    is_completed = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Task: {self.task_description} - {self.party.party_name}"
-
-# Payment Model
-class Payment(BaseModel):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="payments")
     received_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     pending_amount = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
-    payment_date = models.DateField(auto_now_add=True)
+    payment_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    task_complete = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.pending_amount = self.task.amount - self.received_amount  # Auto-calculate pending amount
+        self.pending_amount = self.amount - self.received_amount  
+
+        if self.pending_amount > 0 and self.received_amount > 0:
+            self.status = "partial"
+        elif self.pending_amount == 0:
+            self.status = "completed"
+        else:
+            self.status = "pending"
+
         super().save(*args, **kwargs)
 
+    @property
+    def party_name(self):
+       return self.party.party_name
+
+
     def __str__(self):
-        return f"Payment for {self.task.task_description} - Received: {self.received_amount}"
+        return f"{self.task_description} ({self.status}) - {self.party_name}"
+    
+   
+
+
+
      

@@ -1,56 +1,82 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 
-{% block title %}
-Tasks
-{% endblock %}
-
-{% block style %}
-{% endblock %}
-
+{% block title %}Tasks{% endblock %}
 
 {% block body %}
-<div class="container mx-auto p-6">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Tasks List</h2>
+<header class="bg-indigo-500 text-white p-4">
+  <h1 class="text-center text-2xl font-bold">Task List</h1>
+</header>
 
-    <!-- Table -->
-    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
-        <table class="min-w-full table-auto">
-            <thead class="bg-indigo-500 text-white">
-                <tr>
-                    <th class="py-3 px-4 text-left">Description</th>
-                    <th class="py-3 px-4 text-left">Amount</th>
-                    <th class="py-3 px-4 text-left">Assigned Date</th>
-                    <th class="py-3 px-4 text-left">Complete Date</th>
-                    <th class="py-3 px-4 text-left">Status</th>
-                    <th class="py-3 px-4 text-left">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-700">
-                {% for task in party %}
-                <tr class="border-b hover:bg-gray-100">
-                    <td class="py-3 px-4">{{ task.task_description }}</td>
-                    <td class="py-3 px-4">{{ task.amount }}</td>
-                    <td class="py-3 px-4">{{ task.assign_date }}</td>
-                    <td class="py-3 px-4">{{ task.complete_date }}</td>
-                    <td class="py-3 px-4">{{ task.is_completed|yesno:"Completed,Pending" }}</td>
-                    <a href="{% url 'edit_party' party_id=party.llid %}" class="text-blue-600 hover:text-blue-700">
-                        <i class="fa-regular fa-pen-to-square"></i>
-                    </a>&nbsp;
-                    <a href="{% url 'delete_party' party_id=party.llid %}" method="POST"
-                        class="text-red-600 hover:text-red-700">
-                        <i class="fa-solid fa-x"></i>
-                    </a>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="py-3 px-4 text-center">No tasks available</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="container mx-auto my-6 px-4">
+  <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+      <div class="bg-green-100 text-green-700 p-3 rounded-lg">
+        Completed: <span class="font-bold">{{ completed_task_count }}</span>
+      </div>
+      <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+        Not Completed: <span class="font-bold">{{ incomplete_task_count }}</span>
+      </div>
+      <div class="bg-yellow-100 text-yellow-700 p-3 rounded-lg">
+        Pending Amount: ₹<span class="font-bold">{{ total_pending_amount }}</span>
+      </div>
+      <div class="flex justify-center items-center">
+        <form method="GET">
+          <label class="block text-gray-700 font-semibold mb-1">Filter Tasks</label>
+          <select name="filter" class="p-3 border border-gray-400 rounded-md bg-gray-100 focus:ring-2 focus:ring-indigo-400" onchange="this.form.submit()">
+            <option value="all" {% if filter_type == "all" %}selected{% endif %}>Show All</option>
+            <option value="completed" {% if filter_type == "completed" %}selected{% endif %}>Completed</option>
+            <option value="not_completed" {% if filter_type == "not_completed" %}selected{% endif %}>Not Completed</option>
+            <option value="pending" {% if filter_type == "pending" %}selected{% endif %}>Pending Payment</option>
+          </select>
+        </form>
+      </div>
     </div>
-
+  </div>
 </div>
 
+<div class="container mx-auto px-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for task in tasks %}
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300">
+      <div class="mb-2">
+        <strong>Firm Name:</strong> {{ task.party.firm_name }}
+      </div>
+      <div class="mb-2">
+        <strong>Description:</strong> {{ task.task_description }}
+      </div>
+      <div class="text-gray-600 text-sm mb-2">
+        <p><strong>Assigned:</strong> {{ task.assign_date|date:"F j, Y" }}</p>
+        <p><strong>Completed:</strong> {{ task.complete_date|date:"F j, Y" }}</p>
+        <p><strong>Payment Date:</strong> {{ task.payment_date|date:"F j, Y" }}</p>
+      </div>
+      <div class="mb-2">
+        <strong>Task Complete:</strong> {{ task.task_complete|yesno:"Yes,No" }}
+      </div>
+      <div class="mb-2">
+        <strong>Payment Status:</strong> {{ task.get_status_display }}
+      </div>
+      <div class="text-gray-600 text-sm mb-2">
+        <p><strong>Total Amount:</strong> ₹{{ task.amount }}</p>
+        <p><strong>Received:</strong> ₹{{ task.received_amount }}</p>
+        <p><strong>Pending:</strong> ₹{{ task.pending_amount }}</p>
+      </div>
+      <div class="flex justify-between mt-4">
+        <a href="{% url 'update_task' task.id %}" class="text-blue-600 hover:text-blue-700 font-semibold">Update</a>
+        <a href="{% url 'delete_task' task.id %}" class="text-red-600 hover:text-red-700 font-semibold" onclick="return confirm('Are you sure you want to delete this task?');">Delete</a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="w-full">
+      <p class="text-center text-gray-700 text-lg font-semibold">No tasks available</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}
+
+
+
+
+
+

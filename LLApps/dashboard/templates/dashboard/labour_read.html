@@ -1,0 +1,113 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Labour Workers{% endblock %}
+
+{% block body %}
+<header class="bg-indigo-500 text-white p-4">
+  <h1 class="text-center text-2xl font-bold">Labour List</h1>
+</header>
+
+<!-- Main Content -->
+<div class="container mx-auto my-6 px-4">
+
+  <!-- Top Section: Title & Add Button -->
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold">Labour Workers</h2>
+    <a href="{% url 'labour_create' %}" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+      Add Labour
+    </a>
+  </div>
+
+  <!-- Grid for Workers -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for worker in data %}
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-300 relative">
+
+      <!-- Add Attendance Button (Top Right) -->
+      <div class="absolute top-8 right-6">
+        <a href="{% url 'mark_attendance' worker_id=worker.id %}" 
+          class="bg-blue-600 text-white px-3 py-2 text-sm rounded hover:bg-blue-700">
+          + Add Attendance
+        </a>
+      </div>
+
+      <!-- Worker Info -->
+      <div class="mb-2">
+        <span class="font-semibold text-gray-700">Name: {{ worker.name }}</span>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="text-gray-700 text-sm mb-2">
+        <p><strong>Mobile:</strong> {{ worker.mobile_number }}</p>
+        <p><strong>Email:</strong> {{ worker.email }}</p>
+      </div>
+
+      <!-- Labour Description -->
+      <div class="text-gray-700 text-sm mb-2">
+        <p><strong>Description:</strong> {{ worker.labour_description }}</p>
+      </div>
+
+      <!-- Joining Date -->
+      <div class="text-gray-700 text-sm mb-2">
+        <p><strong>Joining Date:</strong> {{ worker.joining_date }}</p>
+      </div>
+
+      <!-- Attendance Info -->
+      <div class="text-gray-700 text-sm mb-2">
+        <p><strong>Present Days This Month:</strong> {{ worker.present_days }}</p>
+      </div>
+
+      <!-- Total Working Days (Excluding Sundays) -->
+      <div class="text-gray-700 text-sm mb-2">
+        <p><strong>Total Working Days:</strong> {{ worker.total_days }}</p>
+      </div>
+
+      <!-- Salary Details -->
+      <div class="text-gray-700 text-sm mb-2">
+        <p><strong>Monthly Salary:</strong> ₹{{ worker.salary }}</p>
+        <p><strong>Calculated Salary:</strong> ₹{{ worker.calculated_salary|default:"Not Available" }}</p>
+      </div>
+
+      <!-- Payment Status -->
+      <div class="text-gray-700 text-sm mb-2">
+        <p><strong>Salary Paid:</strong>
+          {% if worker.salary_paid %}
+          <span class="text-green-600 font-semibold">Yes</span>
+          {% else %}
+          <span class="text-red-600 font-semibold">No</span>
+          {% endif %}
+        </p>
+      </div>
+
+      <!-- Last Salary Update -->
+      <div class="text-gray-700 text-sm mb-2">
+        <p><strong>Last Salary Update:</strong>
+          {% if worker.payment_date %}
+          {{ worker.payment_date|date:"d M Y" }}
+          {% else %}
+          <span class="text-gray-500">Not Paid Yet</span>
+          {% endif %}
+        </p>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-between items-center mt-4">
+        <div class="flex space-x-3">
+          <a href="{% url 'labour_update' worker_id=worker.id %}" class="text-black hover:text-gray-800">
+            <i class="fa-solid fa-pen"></i> Edit
+          </a>
+          <a href="{% url 'labour_delete' worker_id=worker.id %}" class="text-red-600 hover:text-red-700"
+            onclick="return confirm('Are you sure you want to delete this worker?');">
+            <i class="fa-solid fa-trash"></i> Delete
+          </a>
+        </div>
+        <a href="{% url 'generate_salary' worker_id=worker.id %}"
+          class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+          Calculate Salary
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

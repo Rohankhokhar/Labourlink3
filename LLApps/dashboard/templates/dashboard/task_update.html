@@ -1,0 +1,82 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}
+Update Task
+{% endblock %}
+
+{% block body %}
+<header class="bg-indigo-500 text-white p-4">
+  <h1 class="text-center text-2xl font-bold">Update Task for {{ task.party.firm_name }}</h1>
+</header>
+
+<div class="container mx-auto my-6 px-4 flex justify-center items-center min-h-screen">
+  <div class="bg-white p-6 rounded shadow-md w-full lg:w-1/3 ">
+    <h2 class="text-xl font-semibold mb-4">Update Task Details</h2>
+
+    <form method="POST" action="{% url 'update_task' task_id=task.id %}">
+      {% csrf_token %}
+
+      <!-- Task Description -->
+      <div class="mb-4">
+        <label for="task_description" class="block text-sm font-medium text-gray-700">Task Description</label>
+        {{ form.task_description }}
+      </div>
+
+      <!-- Amount -->
+      <div class="mb-4">
+        <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+        {{ form.amount }}
+      </div>
+
+      <!-- Received Amount -->
+      <div class="mb-4">
+        <label for="received_amount" class="block text-sm font-medium text-gray-700">Received Amount</label>
+        {{ form.received_amount }}
+      </div>
+
+      <!-- Payment Date -->
+      <div class="mb-4">
+        <label for="payment_date" class="block text-sm font-medium text-gray-700">Payment Date (Optional)</label>
+        {{ form.payment_date }}
+      </div>
+
+      <!-- Complete Date -->
+      <div class="mb-4">
+        <label for="complete_date" class="block text-sm font-medium text-gray-700">Complete Date (Optional)</label>
+        {{ form.complete_date }}
+      </div>
+
+      <!-- Task Complete (Checkbox) -->
+      <div class="mb-4">
+        <label for="task_complete" class="block text-sm font-medium text-gray-700">Task Complete</label>
+        <div class="mt-2">
+          <input type="checkbox" id="task_complete" name="task_complete" {% if task.task_complete %}checked{% endif %} class="form-checkbox text-green-600">
+        </div>
+      </div>
+
+      <!-- Status (Radio Buttons) -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Task Status</label>
+        <div class="flex space-x-4 mt-2">
+          <label class="inline-flex items-center">
+            <input type="radio" name="status" value="pending" class="form-radio text-blue-600" {% if task.status == "pending" %}checked{% endif %}>
+            <span class="ml-2 text-gray-900">Pending</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" name="status" value="completed" class="form-radio text-green-600" {% if task.status == "completed" %}checked{% endif %}>
+            <span class="ml-2 text-gray-900">Completed</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" name="status" value="partial" class="form-radio text-yellow-600" {% if task.status == "partial" %}checked{% endif %}>
+            <span class="ml-2 text-gray-900">Partially Paid</span>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Update Task</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+
+
