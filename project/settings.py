@@ -104,10 +104,10 @@ if not DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'llapps$llapps',
-            'USER': 'LLapps1',
+            'NAME': 'LabourLinkApp$default',
+            'USER': 'LabourLinkApp',
             'PASSWORD': 'Rohan@123',
-            'HOST': 'llapps.mysql.pythonanywhere-services.com',
+            'HOST': 'LabourLinkApp.mysql.pythonanywhere-services.com',
             'PORT': '3306', 
         }
     }

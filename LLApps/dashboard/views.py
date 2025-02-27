@@ -232,15 +232,21 @@ def dashboard_view(request):
     }
     return render(request, 'dashboard/dashboard.html', context)
 
+# @login_required
+# def parties_view(request):
+#     labour_id = request.session['LL_labour_id']
+#     partyListAPI = f'{LOCAL_SERVER}/api/parties/?labour={labour_id}'
+#     response = requests.get(partyListAPI)
+#     if response.status_code == 200:
+#         parties = response.json()
+#         return render(request, 'dashboard/parties.html', {'parties': parties})
+#     return render(request, 'dashboard/parties.html')
+
 @login_required
 def parties_view(request):
-    labour_id = request.session['LL_labour_id']
-    partyListAPI = f'{LOCAL_SERVER}/api/parties/?labour={labour_id}'
-    response = requests.get(partyListAPI)
-    if response.status_code == 200:
-        parties = response.json()
-        return render(request, 'dashboard/parties.html', {'parties': parties})
-    return render(request, 'dashboard/parties.html')
+    labour_id = request.session.get('LL_labour_id')
+    parties = PartiesDetail.objects.filter(labour_id=labour_id)
+    return render(request, 'dashboard/parties.html', {'parties': parties})
 
 def party_tasks_view(request, party_id):
     """View to list all tasks for a particular party with filter."""
@@ -271,97 +277,149 @@ def add_new_party(request):
         party_mobile_ = request.POST.get('party_mobile', '').strip()
         address_ = request.POST.get('address', '').strip()
         description_ = request.POST.get('description', '').strip()
+        labour_id = request.session.get('LL_labour_id')
 
-        partyListAPI = f'{LOCAL_SERVER}/api/parties/'
-            
-        party_data = {
-            "firm_name": firm_name_,
-            "party_name": party_name_,
-            "party_mobile": party_mobile_,
-            "address": address_,
-            "description": description_,
-            "labour": request.session.get('LL_labour_id') 
-        }
+        # Create and save a new Party instance
+        PartiesDetail.objects.create(
+            firm_name=firm_name_,
+            party_name=party_name_,
+            party_mobile=party_mobile_,
+            address=address_,
+            description=description_,
+            labour_id=labour_id
+        )
 
-        response = requests.post(partyListAPI, json=party_data)
-
-        if response.status_code == 201:
-            messages.success(request, 'Party added successfully.')
-            return redirect('parties_view')
-
-        # ❌ API request failed, return an error response
-        messages.error(request, 'Failed to add party. Please try again.')
-        return redirect('parties_view')  # Redirect to the form again with an error message
-
-    # ❌ Invalid request method (not POST)
+        messages.success(request, 'Party added successfully.')
+        return redirect('parties_view')
+    
     return render(request, 'dashboard/parties_create.html')
 
 @login_required
 def edit_party(request, party_id):
-    partyDetailAPI = f'{LOCAL_SERVER}/api/party/{party_id}'
-
-    # Handle POST request (Update the party)
-    if request.method == 'POST':
-        # Safely retrieve form data
-        firm_name_ = request.POST.get('firm_name', '')
-        party_name_ = request.POST.get('party_name', '')
-        party_mobile_ = request.POST.get('party_mobile', '')
-        address_ = request.POST.get('address', '')
-        description_ = request.POST.get('description', '')
-
-        party_data = {
-            "firm_name": firm_name_,
-            "party_name": party_name_,
-            "party_mobile": party_mobile_,
-            "address": address_,
-            "description": description_,
-            "labour": request.session['LL_labour_id']  # Assuming there's a labour ID in the session
-        }
-
-        try:
-            # Send PUT request to update the party
-            response = requests.put(partyDetailAPI, json=party_data)
-            print(response)
-            if response.status_code == 200:
-                messages.success(request, 'Party updated successfully.')
-                return redirect('parties_view')
-            else:
-                print(f"Error: {response.status_code}, {response.text}")
-                messages.error(request, 'Failed to update party. Please try again.')
-        except requests.exceptions.RequestException as e:
-            print(f"Request Exception: {e}")
-            messages.error(request, 'Error connecting to the server.')
-
-        # Redirect back to the edit page in case of failure
-        return redirect('edit_party', party_id=party_id)
-
-    # Handle GET request (Fetch party details)
-    try:
-        response = requests.get(partyDetailAPI)
-        if response.status_code == 200:
-            party = response.json()
-            return render(request, 'dashboard/edit_party.html', {'party': party})
-        else:
-            messages.error(request, 'Failed to fetch party details.')
-    except requests.exceptions.RequestException as e:
-        print(f"Request Exception: {e}")
-        messages.error(request, 'Error connecting to the server.')
-
-    # Redirect to the parties list if party details are unavailable
-    return redirect('parties_view')
+    party = get_object_or_404(PartiesDetail, llid=party_id)
     
+    if request.method == 'POST':
+        party.firm_name = request.POST.get('firm_name', party.firm_name)
+        party.party_name = request.POST.get('party_name', party.party_name)
+        party.party_mobile = request.POST.get('party_mobile', party.party_mobile)
+        party.address = request.POST.get('address', party.address)
+        party.description = request.POST.get('description', party.description)
+        party.save()
+
+        messages.success(request, 'Party updated successfully.')
+        return redirect('parties_view')
+    
+    return render(request, 'dashboard/edit_party.html', {'party': party})
 
 @login_required
 def delete_party(request, party_id):
-        partyDetailAPI = f'{LOCAL_SERVER}/api/party/{party_id}'
-        response = requests.delete(partyDetailAPI)
+    party = get_object_or_404(PartiesDetail, llid=party_id)
+    party.delete()
+    messages.success(request, 'Party deleted successfully.')
+    return redirect('parties_view')
 
-        if response.status_code == 204:
-            messages.success(request, 'Party deleted successfully.')
-        else:
-            messages.error(request, 'Failed to delete the party. Please try again later.')
 
-        return redirect('parties_view')
+
+
+# @login_required
+# def add_new_party(request):
+#     if request.method == 'POST':
+#         firm_name_ = request.POST.get('firm_name', '').strip()
+#         party_name_ = request.POST.get('party_name', '').strip()
+#         party_mobile_ = request.POST.get('party_mobile', '').strip()
+#         address_ = request.POST.get('address', '').strip()
+#         description_ = request.POST.get('description', '').strip()
+
+#         partyListAPI = f'{LOCAL_SERVER}/api/parties/'
+            
+#         party_data = {
+#             "firm_name": firm_name_,
+#             "party_name": party_name_,
+#             "party_mobile": party_mobile_,
+#             "address": address_,
+#             "description": description_,
+#             "labour": request.session.get('LL_labour_id') 
+#         }
+
+#         response = requests.post(partyListAPI, json=party_data)
+
+#         if response.status_code == 201:
+#             messages.success(request, 'Party added successfully.')
+#             return redirect('parties_view')
+
+#         # ❌ API request failed, return an error response
+#         messages.error(request, 'Failed to add party. Please try again.')
+#         return redirect('parties_view')  # Redirect to the form again with an error message
+
+#     # ❌ Invalid request method (not POST)
+#     return render(request, 'dashboard/parties_create.html')
+
+# @login_required
+# def edit_party(request, party_id):
+#     partyDetailAPI = f'{LOCAL_SERVER}/api/party/{party_id}'
+
+#     # Handle POST request (Update the party)
+#     if request.method == 'POST':
+#         # Safely retrieve form data
+#         firm_name_ = request.POST.get('firm_name', '')
+#         party_name_ = request.POST.get('party_name', '')
+#         party_mobile_ = request.POST.get('party_mobile', '')
+#         address_ = request.POST.get('address', '')
+#         description_ = request.POST.get('description', '')
+
+#         party_data = {
+#             "firm_name": firm_name_,
+#             "party_name": party_name_,
+#             "party_mobile": party_mobile_,
+#             "address": address_,
+#             "description": description_,
+#             "labour": request.session['LL_labour_id']  # Assuming there's a labour ID in the session
+#         }
+
+#         try:
+#             # Send PUT request to update the party
+#             response = requests.put(partyDetailAPI, json=party_data)
+#             print(response)
+#             if response.status_code == 200:
+#                 messages.success(request, 'Party updated successfully.')
+#                 return redirect('parties_view')
+#             else:
+#                 print(f"Error: {response.status_code}, {response.text}")
+#                 messages.error(request, 'Failed to update party. Please try again.')
+#         except requests.exceptions.RequestException as e:
+#             print(f"Request Exception: {e}")
+#             messages.error(request, 'Error connecting to the server.')
+
+#         # Redirect back to the edit page in case of failure
+#         return redirect('edit_party', party_id=party_id)
+
+#     # Handle GET request (Fetch party details)
+#     try:
+#         response = requests.get(partyDetailAPI)
+#         if response.status_code == 200:
+#             party = response.json()
+#             return render(request, 'dashboard/edit_party.html', {'party': party})
+#         else:
+#             messages.error(request, 'Failed to fetch party details.')
+#     except requests.exceptions.RequestException as e:
+#         print(f"Request Exception: {e}")
+#         messages.error(request, 'Error connecting to the server.')
+
+#     # Redirect to the parties list if party details are unavailable
+#     return redirect('parties_view')
+    
+
+# @login_required
+# def delete_party(request, party_id):
+#         partyDetailAPI = f'{LOCAL_SERVER}/api/party/{party_id}'
+#         response = requests.delete(partyDetailAPI)
+
+#         if response.status_code == 204:
+#             messages.success(request, 'Party deleted successfully.')
+#         else:
+#             messages.error(request, 'Failed to delete the party. Please try again later.')
+
+#         return redirect('parties_view')
 
 @login_required
 def payments_view(request):
@@ -433,11 +491,14 @@ def update_profile_view(request):
 
 
 def tasks_view(request):
-    # Get filter from request
+    party_id = request.session.get('LL_labour_id')  # Get Labour ID from session
+
+    if party_id:
+        tasks = Task.objects.filter(party__labour_id=party_id)
     filter_type = request.GET.get('filter', 'all')
 
     # Fetch tasks based on filter
-    tasks = Task.objects.all()
+    # tasks = Task.objects.all()
 
     if filter_type == 'completed':
         tasks = tasks.filter(task_complete=True)
@@ -509,7 +570,9 @@ def labour_read(request):
     current_month = now().month
     current_year = now().year
 
-    workers = LabourWorker.objects.all()
+    # workers = LabourWorker.objects.all()
+    labour_id = request.session.get('LL_labour_id')
+    workers = LabourWorker.objects.filter(labour_id=labour_id)
 
     for worker in workers:
         # Ensure MonthlySalary exists for this worker
